@@ -123,7 +123,6 @@ function statusLabel(s){ s=normalizeStatus(s); return s==="loan"?"貸出中":s==
 /* =========================================================
    3) 描画・UI
 ========================================================= */
-// ★ グローバル変数：現在のカテゴリ
 let currentCategory = "av"; 
 
 const monthPicker = document.getElementById("monthPicker");
@@ -153,7 +152,6 @@ function renderAll(){
   requestAnimationFrame(ensureDoubleScroll);
 }
 
-// 【日単位】予約表
 function renderDailyGrid(){
   const {year, month} = getSelectedMonth();
   const dim = daysInMonth(year, month);
@@ -197,7 +195,6 @@ function renderDailyGrid(){
   grid.innerHTML = `<thead>${thead}</thead><tbody>${tbody}</tbody>`;
 }
 
-// 【時間単位】予約表 (結合対応＋自動スクロール対応)
 function renderHourlyGrid(category){
   const {year, month} = getSelectedMonth();
   const dim = daysInMonth(year, month);
@@ -213,7 +210,7 @@ function renderHourlyGrid(category){
   thead += `</tr>`;
 
   let tbody = "";
-  let hasToday = false; // 今日の行が存在するか
+  let hasToday = false; 
 
   for(let d=1; d<=dim; d++){
     const dateStr = `${year}-${pad2(month)}-${pad2(d)}`;
@@ -223,7 +220,6 @@ function renderHourlyGrid(category){
     items.forEach((it, idx) => {
       let colorClass = isToday ? "bg-row-today" : (idx % 2 === 0 ? "bg-row-a" : "bg-row-b");
 
-      // 今日の先頭行にIDを付与してスクロールの目印にする
       const rowIdStr = (isToday && idx === 0) ? `id="today-row"` : "";
       tbody += `<tr class="${colorClass}" ${rowIdStr}>`;
       
@@ -233,21 +229,19 @@ function renderHourlyGrid(category){
       }
       tbody += `<td class="hourly-sticky-item">${it.name}</td>`;
 
-      let skipUntil = 0; // セル結合用スキップカウンタ
+      let skipUntil = 0; 
 
       for(let h=9; h<=21; h++){
-        if (h < skipUntil) continue; // 結合されたセル部分はスキップ
+        if (h < skipUntil) continue; 
 
         const hourStr = `${pad2(h)}:00`;
         const nextHourStr = `${pad2(h+1)}:00`;
         
-        // その時間帯に存在する予約を取得
         const overlaps = resList.filter(r => r.itemId == it.id && r.date === dateStr && (r.startTime < nextHourStr && r.endTime > hourStr));
 
         if(overlaps.length > 0){
-          // セルの結合数(colspan)を計算
           let colspan = 1;
-          const baseResId = overlaps[0].id; // 代表の予約ID
+          const baseResId = overlaps[0].id; 
           const statuses = overlaps.map(r=>r.status);
           const status = statuses.includes("loan") ? "loan" : statuses.includes("reserved") ? "reserved" : "returned";
           const overdue = overlaps.some(r => r.status==="loan" && dateStr <= todayStr && r.endTime < pad2(new Date().getHours())+":00") ? "overdue" : "";
@@ -260,24 +254,25 @@ function renderHourlyGrid(category){
               if(nextOverlaps.some(r => r.id === baseResId)) {
                   colspan++;
               } else {
-                  break; // 途切れたら終了
+                  break; 
               }
           }
 
-          skipUntil = h + colspan; // 描画をスキップする次の時間
+          skipUntil = h + colspan; 
 
-          // テキスト生成
+          // 単位付きの文字列生成
           let slipText = overlaps.map(r => r.slipNo).filter(Boolean).join(", ");
           let cellText = "";
-          if (isSpace) {
+          let unit = (category === "pipespace") ? "脚" : (category === "deskspace" || category === "rearcar") ? "台" : "";
+
+          if (isSpace || category === "rearcar") {
              const totalQty = overlaps.reduce((sum, r) => sum + (Number(r.quantity)||1), 0);
-             if(slipText) cellText = `${slipText} (${totalQty}/${it.capacity || 1})`;
-             else cellText = `(${totalQty}/${it.capacity || 1})`;
+             cellText = slipText ? `${slipText} (${totalQty}${unit}/${it.capacity || 1}${unit})` : `(${totalQty}${unit}/${it.capacity || 1}${unit})`;
           } else {
-             cellText = slipText; // 開始時間のみ表示しなくて済む（結合されるため）
+             cellText = slipText; 
           }
           
-          const titles = overlaps.map(r => `団体: ${r.group} (${r.quantity||1}個) ${r.startTime}~${r.endTime}`).join("\n");
+          const titles = overlaps.map(r => `団体: ${r.group} (${r.quantity||1}${unit}) ${r.startTime}~${r.endTime}`).join("\n");
           tbody += `<td colspan="${colspan}" class="cell ${status} ${overdue}" onclick="openModal('${baseResId}')" title="${titles}" style="text-align:center;">${escapeHtml(cellText)}</td>`;
         } else {
           tbody += `<td class="cell ${colorClass}" onclick="openNewModal(${it.id}, '${dateStr}', '${hourStr}')"></td>`;
@@ -288,19 +283,17 @@ function renderHourlyGrid(category){
   }
   grid.innerHTML = `<thead>${thead}</thead><tbody>${tbody}</tbody>`;
 
-  // ★自動スクロール実行 (描画完了後に少し遅らせて実行)
   if(hasToday) {
     setTimeout(() => {
         const todayRow = document.getElementById('today-row');
         const scrollContainer = document.getElementById('gridScroll');
         if (todayRow && scrollContainer) {
-            scrollContainer.scrollTop = todayRow.offsetTop - 60; // ヘッダー分少しオフセット
+            scrollContainer.scrollTop = todayRow.offsetTop - 60; 
         }
     }, 50);
   }
 }
 
-// サマリー計算
 function renderStats(cat){
   const items = ITEMS_DATA.filter(i => i.category === cat);
   const statsGrid = document.getElementById("statsGrid");
@@ -329,7 +322,7 @@ function renderStats(cat){
   } else {
     const today = ymd(new Date());
     const nowHour = pad2(new Date().getHours()) + ":00";
-    const unit = (cat === "pipespace" || cat === "deskspace") ? "脚(個)" : "台";
+    const unit = (cat === "pipespace" || cat === "deskspace") ? "脚" : "台"; // 単位を動的に設定
 
     items.forEach(it => {
         let loan = 0;
@@ -379,7 +372,6 @@ function renderList(){
     if(!overlapsMonth(r.startDate, r.endDate, mStart, mEnd)) return;
     const it = findItem(r.itemId);
     
-    // ★ リスト表示も現在のカテゴリと連動させる
     if(!it || it.category !== currentCategory) return;
 
     const iname = (it?it.name:"").toLowerCase();
@@ -626,13 +618,19 @@ document.getElementById("modalCancel").onclick = () => modal.close();
 document.getElementById("closeModalBtn").onclick = () => modal.close();
 
 const itemsModal = document.getElementById("itemsModal");
-document.getElementById("itemsBtn").onclick = () => { renderItemsTable(); itemsModal.showModal(); };
+
+// 「備品管理」ボタン押下時：AVカテゴリ以外は追加セクションを非表示に
+document.getElementById("itemsBtn").onclick = () => { 
+  document.getElementById("addItemSection").style.display = (currentCategory === "av") ? "block" : "none";
+  renderItemsTable(); 
+  itemsModal.showModal(); 
+};
+
 document.getElementById("closeItemsModal").onclick = () => itemsModal.close();
 document.getElementById("itemsClose2").onclick = () => itemsModal.close();
 
 function renderItemsTable(){
   const tbody = document.getElementById("itemsTbody"); tbody.innerHTML = "";
-  // 備品管理のリスト表示も現在のカテゴリと連動する
   ITEMS_DATA.filter(it => it.category === currentCategory).forEach(it => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -645,7 +643,6 @@ function renderItemsTable(){
   });
 }
 
-// 変更がグローバルに適用されるよう window に紐付け
 window.updateItemData = function(id){
   const nm = document.getElementById("iname_"+id).value.trim();
   const cap = parseInt(document.getElementById("icap_"+id).value) || 1;
@@ -667,7 +664,6 @@ document.getElementById("addItemBtn").onclick = () => {
   document.getElementById("newItemName").value = "";
   document.getElementById("newItemCapacity").value = "";
   
-  // 追加したカテゴリへ自動的に遷移して表示
   document.querySelector(`.catbtn[data-cat="${cat}"]`).click(); 
   renderItemsTable(); 
   showToast("備品を追加しました", "ok");
@@ -702,9 +698,7 @@ function countDueToday(){
   return {due, overdue};
 }
 
-// 初期化
 (function init(){
-  // タブの切り替え処理
   document.querySelectorAll(".tabbtn[data-tab]").forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll(".tabbtn[data-tab]").forEach(b=>b.classList.remove("active"));
@@ -715,12 +709,11 @@ function countDueToday(){
     };
   });
   
-  // カテゴリボタンの切り替え処理
   document.querySelectorAll(".catbtn").forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll(".catbtn").forEach(b=>b.classList.remove("active"));
       btn.classList.add("active");
-      currentCategory = btn.dataset.cat; // グローバル変数を更新
+      currentCategory = btn.dataset.cat; 
       renderAll();
     };
   });
