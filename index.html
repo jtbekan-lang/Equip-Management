@@ -13,7 +13,6 @@
     <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
       <h1>備品予約管理</h1>
       <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
-        
         <div style="min-width:320px;">
           <label style="margin:0 0 6px;">表示カテゴリ</label>
           <div class="tabs" style="margin-top:0;">
@@ -23,7 +22,6 @@
             <button class="tabbtn catbtn" data-cat="deskspace">デスク(時)</button>
           </div>
         </div>
-
         <div style="min-width:140px;">
           <label style="margin:0 0 6px;">表示月</label>
           <input id="monthPicker" type="month" />
@@ -140,7 +138,7 @@
 
     <div style="display:flex; gap:10px;">
       <div style="flex:3;"><label>団体名</label><input id="modalGroup" placeholder="例：軽音楽研究会IPC" /></div>
-      <div style="flex:1;"><label>数量 (個/脚)</label><input id="modalQuantity" type="number" min="1" placeholder="1" /></div>
+      <div style="flex:1;"><label>数量 (個/脚/台)</label><input id="modalQuantity" type="number" min="1" placeholder="1" /></div>
     </div>
     
     <div><label>状態</label><select id="modalStatus"><option value="reserved">予約（未貸出）</option><option value="loan">貸出中</option><option value="returned">返却済</option></select></div>
@@ -162,7 +160,7 @@
     <button class="xbtn" id="closeItemsModal">✕</button>
   </div>
   <div class="modalBody">
-    <div>
+    <div id="addItemSection">
       <label>備品を追加</label>
       <div style="display:flex; gap:10px; align-items:center;">
         <input id="newItemName" placeholder="名称" style="flex:2;" />
