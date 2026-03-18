@@ -123,7 +123,7 @@
         <div style="min-width:160px;">
           <label style="margin:0 0 6px;">表示カテゴリ</label>
           <select id="categorySelect" style="font-weight:bold; color:var(--primary); border-color:var(--primary);">
-            <option value="av">音響・ケーブル (日単位)</option>
+            <option value="av">備品 (日単位)</option>
             <option value="rearcar">リヤカー (時間単位)</option>
             <option value="pipespace">パイプスペース (時間単位)</option>
             <option value="deskspace">デスクスペース (時間単位)</option>
@@ -249,7 +249,7 @@
     </div>
     
     <div><label>状態</label><select id="modalStatus"><option value="reserved">予約（未貸出）</option><option value="loan">貸出中</option><option value="returned">返却済</option></select></div>
-    <div><label>伝票番号（任意・AV用）</label><input id="modalSlip" placeholder="例：A-12345" /></div>
+    <div><label>伝票番号（任意）</label><input id="modalSlip" placeholder="例：A-12345" /></div>
     <div id="modalMsg" class="msg"></div>
   </div>
   <div class="modalFoot">
@@ -273,7 +273,7 @@
         <input id="newItemName" placeholder="名称" style="flex:2;" />
         <input id="newItemCapacity" type="number" min="1" placeholder="総数" style="flex:1;" />
         <select id="newItemCategory" style="flex:1;">
-          <option value="av">音響(日)</option><option value="rearcar">ﾘﾔｶｰ(時)</option>
+          <option value="av">備品(日)</option><option value="rearcar">ﾘﾔｶｰ(時)</option>
           <option value="pipespace">ﾊﾟｲﾌﾟ(時)</option><option value="deskspace">ﾃﾞｽｸ(時)</option>
         </select>
         <button id="addItemBtn">追加</button>
@@ -324,7 +324,7 @@
 
 <script>
 /* =========================================================
-   1) 備品データ＆ユーティリティ（欠番を埋め、AVがぴったり70個になるよう修正）
+   1) 備品データ＆ユーティリティ
 ========================================================= */
 const ITEMS_DEFAULT = [
   // AV (70 items, capacity 1)
@@ -365,7 +365,7 @@ const ITEMS_DEFAULT = [
   { id: 35, name: "延長コード / E", type: "daily", category: "av", capacity: 1 },
   { id: 36, name: "延長コード / F", type: "daily", category: "av", capacity: 1 },
   { id: 37, name: "延長コード / G", type: "daily", category: "av", capacity: 1 },
-  { id: 38, name: "延長コード / H (予備)", type: "daily", category: "av", capacity: 1 }, /* ★追加 欠番補完 */
+  { id: 38, name: "延長コード / H (予備)", type: "daily", category: "av", capacity: 1 }, 
   { id: 39, name: "2股プラグ / A", type: "daily", category: "av", capacity: 1 },
   { id: 40, name: "2股プラグ / B", type: "daily", category: "av", capacity: 1 },
   { id: 41, name: "2股プラグ / C", type: "daily", category: "av", capacity: 1 },
@@ -394,7 +394,7 @@ const ITEMS_DEFAULT = [
   { id: 64, name: "スピーカースタンド / A", type: "daily", category: "av", capacity: 1 },
   { id: 65, name: "スピーカースタンド / B", type: "daily", category: "av", capacity: 1 },
   { id: 66, name: "スピーカースタンド / C", type: "daily", category: "av", capacity: 1 },
-  { id: 67, name: "スピーカースタンド / D (予備)", type: "daily", category: "av", capacity: 1 }, /* ★追加 欠番補完 */
+  { id: 67, name: "スピーカースタンド / D (予備)", type: "daily", category: "av", capacity: 1 }, 
   { id: 68, name: "ポータブルスピーカー", type: "daily", category: "av", capacity: 1 },
   { id: 69, name: "床保護マット / A", type: "daily", category: "av", capacity: 1 },
   { id: 70, name: "床保護マット / B", type: "daily", category: "av", capacity: 1 },
@@ -456,7 +456,6 @@ function renderAll(){
   const cat = catSelect.value;
   const isAv = (cat === "av");
   
-  // 期限のテキスト更新
   const limitPill = document.getElementById("limitPill");
   if(isAv) limitPill.textContent = "予約可能：翌月末まで(1日単位)";
   else if(cat==="rearcar") limitPill.textContent = "予約可能：1ヶ月先月末まで(時間)";
@@ -475,7 +474,7 @@ function renderAll(){
 function renderDailyGrid(){
   const {year, month} = getSelectedMonth();
   const dim = daysInMonth(year, month);
-  const items = ITEMS_DATA.filter(i => i.category === "av"); // 70個
+  const items = ITEMS_DATA.filter(i => i.category === "av"); 
   const resList = loadReservations();
 
   let thead = `<tr><th class="daily-sticky">備品</th>`;
@@ -487,7 +486,6 @@ function renderDailyGrid(){
 
   let tbody = "";
   items.forEach((it, idx) => {
-    // ★ 備品名の横に番号（1から70）を表示
     const displayNum = pad2(idx + 1);
     const displayName = `<span style="font-size:11px; color:var(--muted); margin-right:6px; font-weight:bold;">${displayNum}.</span>${it.name}`;
     
@@ -499,7 +497,6 @@ function renderDailyGrid(){
       if(res){
         const isStart = (res.startDate === dateStr || d===1);
         const overdue = (res.status==="loan" && res.endDate < ymd(new Date())) ? "overdue" : "";
-        // 伝票番号のみ表示。複数個の予約があれば数量も添える
         let cellText = "";
         if(isStart) {
           cellText = res.slipNo || "";
@@ -537,7 +534,6 @@ function renderHourlyGrid(category){
     const dt = new Date(year, month-1, d);
     
     items.forEach((it, idx) => {
-      // グレー系のシマシマ背景
       let colorClass = idx % 2 === 0 ? "bg-row-a" : "bg-row-b";
 
       tbody += `<tr class="${colorClass}">`;
@@ -548,7 +544,6 @@ function renderHourlyGrid(category){
         const hourStr = `${pad2(h)}:00`;
         const nextHourStr = `${pad2(h+1)}:00`;
         
-        // 該当時間の予約をすべて抽出
         const overlaps = resList.filter(r => r.itemId == it.id && r.date === dateStr && (r.startTime < nextHourStr && r.endTime > hourStr));
 
         if(overlaps.length > 0){
@@ -557,16 +552,13 @@ function renderHourlyGrid(category){
           const status = statuses.includes("loan") ? "loan" : statuses.includes("reserved") ? "reserved" : "returned";
           const overdue = overlaps.some(r => r.status==="loan" && dateStr <= ymd(new Date()) && r.endTime < pad2(new Date().getHours())+":00") ? "overdue" : "";
           
-          // ★ ご要望のセルテキスト： 伝票番号 (予約数 / 総数)
           let slipText = overlaps.map(r => r.slipNo).filter(Boolean).join(", ");
-          
           let cellText = "";
           if (isSpace) {
              const totalQty = overlaps.reduce((sum, r) => sum + (Number(r.quantity)||1), 0);
              if(slipText) cellText = `${slipText} (${totalQty}/${it.capacity || 1})`;
              else cellText = `(${totalQty}/${it.capacity || 1})`;
           } else {
-             // リアカー等の場合は開始セルに伝票番号を表示
              if(isStart) cellText = slipText;
           }
           
@@ -582,14 +574,13 @@ function renderHourlyGrid(category){
   grid.innerHTML = `<thead>${thead}</thead><tbody>${tbody}</tbody>`;
 }
 
-// サマリー計算（★ご要望に合わせて場所ごとにカードを分裂させます）
+// サマリー計算
 function renderStats(cat){
   const items = ITEMS_DATA.filter(i => i.category === cat);
   const statsGrid = document.getElementById("statsGrid");
   statsGrid.innerHTML = "";
 
   if(cat === "av") {
-    // 音響（AV）のときは従来の4カードを生成
     let total = items.length;
     let used = 0, loan = 0;
     const today = ymd(new Date());
@@ -610,7 +601,6 @@ function renderStats(cat){
       <div class="statCard"><div><div class="statTitle">期限超過</div><div class="statValue">${od}</div></div><div class="iconWrap red"><svg viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></div></div>
     `;
   } else {
-    // ★パイプスペースやリアカーの場合は、場所ごとにカードを生成
     const today = ymd(new Date());
     const nowHour = pad2(new Date().getHours()) + ":00";
     const unit = (cat === "pipespace" || cat === "deskspace") ? "脚(個)" : "台";
@@ -641,7 +631,6 @@ function renderStats(cat){
   }
 }
 
-// ダブルスクロール同期
 let syncFlags = { top:false, bot:false };
 function ensureDoubleScroll(){
   const t = document.getElementById("topScroll"), ti = document.getElementById("topScrollInner"), b = document.getElementById("gridScroll");
@@ -650,9 +639,6 @@ function ensureDoubleScroll(){
   b.onscroll = () => { if(!syncFlags.bot){ syncFlags.top=true; t.scrollLeft = b.scrollLeft; } syncFlags.bot=false; };
 }
 
-/* =========================================================
-   4) 一覧タブとバッチ処理
-========================================================= */
 const listBody = document.getElementById("listBody");
 const searchInput = document.getElementById("searchInput");
 let listRowPayload = new Map();
@@ -739,9 +725,6 @@ document.getElementById("listSelectAllBtn").onclick = () => { listRowPayload.for
 document.getElementById("listClearSelBtn").onclick = () => { listSelectedKeys.clear(); renderList(); };
 searchInput.oninput = renderList;
 
-/* =========================================================
-   5) モーダル (予約追加・編集・一括)
-========================================================= */
 const modal = document.getElementById("modal");
 let editingIds = [];
 let modalSelectedItemIds = new Set();
@@ -759,7 +742,7 @@ function openNewModal(itemId, dateStr, hourStr = "09:00"){
   document.getElementById("modalStartTime").value = hourStr;
   document.getElementById("modalEndTime").value = pad2(parseInt(hourStr)+1)+":00";
   document.getElementById("modalGroup").value = "";
-  document.getElementById("modalQuantity").value = "1"; // 初期数量
+  document.getElementById("modalQuantity").value = "1";
   document.getElementById("modalSlip").value = "";
   document.getElementById("modalStatus").value = "reserved";
   
@@ -832,7 +815,6 @@ document.getElementById("multiSearch").oninput = renderMultiList;
 document.getElementById("multiAllBtn").onclick = () => { ITEMS_DATA.filter(i=>i.category===findItem(document.getElementById("modalItem").value).category).forEach(i=>modalSelectedItemIds.add(i.id)); renderMultiList(); };
 document.getElementById("multiClearBtn").onclick = () => { modalSelectedItemIds.clear(); modalSelectedItemIds.add(Number(document.getElementById("modalItem").value)); renderMultiList(); };
 document.getElementById("modalItem").onchange = (e) => { toggleModalInputs(findItem(e.target.value).category); modalSelectedItemIds.add(Number(e.target.value)); renderMultiList(); };
-
 
 document.getElementById("modalSave").onclick = () => {
   const msg = document.getElementById("modalMsg");
@@ -913,9 +895,6 @@ document.getElementById("modalDelete").onclick = () => {
 document.getElementById("modalCancel").onclick = () => modal.close();
 document.getElementById("closeModalBtn").onclick = () => modal.close();
 
-/* =========================================================
-   6) 備品管理モーダル（総数も編集可能）
-========================================================= */
 const itemsModal = document.getElementById("itemsModal");
 document.getElementById("itemsBtn").onclick = () => { renderItemsTable(); itemsModal.showModal(); };
 document.getElementById("closeItemsModal").onclick = () => itemsModal.close();
@@ -956,9 +935,6 @@ document.getElementById("addItemBtn").onclick = () => {
   renderItemsTable(); renderAll(); showToast("備品を追加しました", "ok");
 };
 
-/* =========================================================
-   7) 全データ削除モーダル
-========================================================= */
 const clearModal = document.getElementById("clearModal");
 document.getElementById("clearBtn").onclick = () => { document.getElementById("clearMonth").value=ymd(new Date()).slice(0,7); clearModal.showModal(); };
 document.getElementById("closeClearModal").onclick = () => clearModal.close();
@@ -978,9 +954,6 @@ document.getElementById("clearDoBtn").onclick = () => {
   saveReservations(next); renderAll(); clearModal.close(); showToast("期限までのデータを削除しました", "ok");
 };
 
-/* =========================================================
-   8) 通知・初期化
-========================================================= */
 function countDueToday(){
   const today = ymd(new Date());
   let due = 0, overdue = 0;
@@ -1009,7 +982,6 @@ function showTomorrowPopup(){
 }
 document.getElementById("dailyOkBtn").onclick = () => document.getElementById("dailyModal").close();
 
-// Initialize
 (function init(){
   document.querySelectorAll(".tabbtn").forEach(btn => {
     btn.onclick = () => {
