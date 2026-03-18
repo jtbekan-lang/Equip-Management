@@ -263,7 +263,6 @@ function renderHourlyGrid(category){
           let slipText = overlaps.map(r => r.slipNo).filter(Boolean).join(", ");
           let cellText = "";
           let unit = (category === "pipespace") ? "脚" : (category === "deskspace" || category === "rearcar") ? "台" : "個";
-          // 黒文字で強調する単位のHTMLを作成
           let unitHtml = `<span style="color:#0f172a; font-weight:bold;">${unit}</span>`;
 
           if (isSpace || category === "rearcar") {
@@ -399,7 +398,6 @@ function renderList(){
     cb.checked = listSelectedKeys.has(r.id);
     listRowPayload.set(r.id, r.ids);
 
-    // リストの数量にも単位を付与
     let unit = (it && it.category === "pipespace") ? "脚" : (it && (it.category === "deskspace" || it.category === "rearcar")) ? "台" : "個";
 
     tr.innerHTML = `
@@ -514,7 +512,6 @@ function toggleModalInputs(cat){
   document.getElementById("hourlyInputs").style.display = isAv ? "none" : "flex";
   document.getElementById("multiContainer").style.display = "block";
 
-  // モーダル入力欄の単位を動的に変更
   let unit = (cat === "pipespace") ? "脚" : (cat === "deskspace" || cat === "rearcar") ? "台" : "個";
   document.getElementById("modalUnit").textContent = unit;
 }
