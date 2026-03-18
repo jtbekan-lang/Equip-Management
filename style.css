@@ -2,7 +2,7 @@
   --page:#f6f7fb; --card:#ffffff; --card2:#fbfcff; --border:#e6e9f2; --border2:#dbe1ee;
   --text:#0f172a; --muted:#64748b; --shadow:0 14px 38px rgba(15,23,42,.08); --shadow2:0 8px 20px rgba(15,23,42,.06); --radius:16px;
   --primary:#2563eb; --primary2:#7c3aed; --danger:#e11d48; --ok:#16a34a; --warn:#f59e0b; --cyan:#06b6d4;
-  --reservedBg:#d1d5dba6; --loanBg:#feecd6; --returnedBg:#abffd9; --overdue:#ef4444; --hover:#eef2ff;
+  --reservedBg:#bae6fd; --loanBg:#fde047; --returnedBg:#bbf7d0; --overdue:#ef4444; --hover:#eef2ff;
 }
 *{box-sizing:border-box} html,body{height:100%}
 body{
@@ -53,7 +53,7 @@ button.danger{ background: linear-gradient(135deg, rgba(225,29,72,.10), rgba(225
 .tableWrap{ overflow:auto; border-radius:14px; border:1px solid var(--border); background:#fff; box-shadow: var(--shadow2); max-height: calc(100vh - 360px); }
 @media (max-width:520px){ .tableWrap{max-height: calc(100vh - 380px);} }
 table{ border-collapse:separate; border-spacing:0; width:max(900px,100%); background:#fff; font-size:12.5px; color:#0f172a; }
-th,td{ border-bottom:1px solid var(--border); border-right:1px solid var(--border); padding:6px 8px; vertical-align:middle; text-align:center; min-width:44px; white-space:nowrap; }
+th,td{ border-bottom:1px solid var(--border); border-right:1px solid var(--border); padding:12px 8px; vertical-align:middle; text-align:center; min-width:44px; white-space:nowrap; }
 thead th{ position:sticky; top:0; z-index:10; background:#f1f5f9; font-weight:700; }
 thead tr:nth-child(2) th{ top:30px; font-weight:650; color:#475569; background:#f8fafc; }
 td.cell{cursor:pointer;position:relative; font-size:11.5px;}
