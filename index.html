@@ -50,9 +50,8 @@
     .tabbtn.active{ background: linear-gradient(135deg, rgba(37,99,235,.10), rgba(124,58,237,.08)); border-color: rgba(37,99,235,.22); color:#1e3a8a; }
     .tabpane{display:none} .tabpane.active{display:block}
 
-    .statsGrid{ display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:14px; margin-bottom:14px; }
-    @media (max-width:980px){ .statsGrid{grid-template-columns:repeat(2, minmax(0, 1fr));} }
-    @media (max-width:520px){ .statsGrid{grid-template-columns:1fr;} }
+    /* ★ Stats Grid（可変カラム対応） */
+    .statsGrid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:14px; }
     .statCard{ background:#fff; border:1px solid var(--border); border-radius:18px; box-shadow: var(--shadow2); padding:16px; display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:88px; }
     .statTitle{ font-size:13px; color:var(--muted); font-weight:650; }
     .statValue{ margin-top:6px; font-size:30px; font-weight:800; color:#0f172a; line-height:1; }
@@ -65,7 +64,7 @@
     th,td{ border-bottom:1px solid var(--border); border-right:1px solid var(--border); padding:6px 8px; vertical-align:middle; text-align:center; min-width:44px; white-space:nowrap; }
     thead th{ position:sticky; top:0; z-index:10; background:#f1f5f9; font-weight:700; }
     thead tr:nth-child(2) th{ top:30px; font-weight:650; color:#475569; background:#f8fafc; }
-    td.cell{cursor:pointer;position:relative; font-size:11.5px;} /* セルの文字を少し小さく */
+    td.cell{cursor:pointer;position:relative; font-size:11.5px;}
     td.cell.reserved{background:var(--reservedBg)} td.cell.loan{background:var(--loanBg)} td.cell.returned{background:var(--returnedBg)} td.cell:hover{background:var(--hover) !important} td.cell.overdue{ outline:2px solid var(--overdue); outline-offset:-2px; }
 
     .daily-sticky { position:sticky; left:0; z-index:5; background:#fff; min-width:260px; max-width:260px; border-right:1px solid var(--border2); text-align:left; }
@@ -74,7 +73,7 @@
     .hourly-sticky-item { position:sticky; left:80px; z-index:5; background:#fff; min-width:180px; max-width:180px; border-right:1px solid var(--border2); text-align:left; }
     thead .hourly-sticky-date, thead .hourly-sticky-item { z-index:15; background:#f1f5f9; text-align:center; border-bottom: 1px solid var(--border2); }
 
-    /* ★無彩色（グレー系）で統一された場所ごとの色分け */
+    /* 無彩色（グレー系）のシマシマ背景 */
     .bg-row-a { background-color: #f1f5f9 !important; }
     .bg-row-b { background-color: #f8fafc !important; }
 
@@ -154,29 +153,12 @@
 
 <main>
   <div class="wrap">
-    <section class="statsGrid" aria-label="サマリー">
-      <div class="statCard">
-        <div><div class="statTitle" id="statTotalLabel">総備品数</div><div class="statValue" id="statTotal">—</div></div>
-        <div class="iconWrap blue"><svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><path d="M3.3 7l8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg></div>
-      </div>
-      <div class="statCard">
-        <div><div class="statTitle" id="statAvailableLabel">本日利用可能</div><div class="statValue" id="statAvailable">—</div></div>
-        <div class="iconWrap green"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M20 6 9 17l-5-5"></path></svg></div>
-      </div>
-      <div class="statCard">
-        <div><div class="statTitle" id="statLoanLabel">貸出中（本日）</div><div class="statValue" id="statLoan">—</div></div>
-        <div class="iconWrap amber"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6l4 2"></path></svg></div>
-      </div>
-      <div class="statCard">
-        <div><div class="statTitle" id="statOverdueLabel">期限超過</div><div class="statValue" id="statOverdue">—</div></div>
-        <div class="iconWrap red"><svg viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></div>
-      </div>
-    </section>
+    <section class="statsGrid" aria-label="サマリー" id="statsGrid"></section>
 
     <section id="tabGrid" class="tabpane active">
       <div style="background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow);">
         <div style="font-weight:800; font-size:16px;" id="gridTitle">日 × 備品</div>
-        <div class="hint">セルをクリックすると予約の追加・編集ができます。<br>複数日（または複数時間）予約の場合、開始セルに伝票番号または数量が表示されます。</div>
+        <div class="hint">セルをクリックすると予約の追加・編集ができます。<br>複数日（または複数時間）予約の場合、セルに伝票番号または数量が表示されます。</div>
         <div id="topScroll" class="topScroll" style="margin-top:12px;"><div id="topScrollInner"></div></div>
         <div id="gridScroll" class="tableWrap" style="margin-top:10px;">
           <table id="grid"></table>
@@ -342,7 +324,7 @@
 
 <script>
 /* =========================================================
-   1) 備品データ＆ユーティリティ
+   1) 備品データ＆ユーティリティ（欠番を埋め、AVがぴったり70個になるよう修正）
 ========================================================= */
 const ITEMS_DEFAULT = [
   // AV (70 items, capacity 1)
@@ -383,6 +365,7 @@ const ITEMS_DEFAULT = [
   { id: 35, name: "延長コード / E", type: "daily", category: "av", capacity: 1 },
   { id: 36, name: "延長コード / F", type: "daily", category: "av", capacity: 1 },
   { id: 37, name: "延長コード / G", type: "daily", category: "av", capacity: 1 },
+  { id: 38, name: "延長コード / H (予備)", type: "daily", category: "av", capacity: 1 }, /* ★追加 欠番補完 */
   { id: 39, name: "2股プラグ / A", type: "daily", category: "av", capacity: 1 },
   { id: 40, name: "2股プラグ / B", type: "daily", category: "av", capacity: 1 },
   { id: 41, name: "2股プラグ / C", type: "daily", category: "av", capacity: 1 },
@@ -411,6 +394,7 @@ const ITEMS_DEFAULT = [
   { id: 64, name: "スピーカースタンド / A", type: "daily", category: "av", capacity: 1 },
   { id: 65, name: "スピーカースタンド / B", type: "daily", category: "av", capacity: 1 },
   { id: 66, name: "スピーカースタンド / C", type: "daily", category: "av", capacity: 1 },
+  { id: 67, name: "スピーカースタンド / D (予備)", type: "daily", category: "av", capacity: 1 }, /* ★追加 欠番補完 */
   { id: 68, name: "ポータブルスピーカー", type: "daily", category: "av", capacity: 1 },
   { id: 69, name: "床保護マット / A", type: "daily", category: "av", capacity: 1 },
   { id: 70, name: "床保護マット / B", type: "daily", category: "av", capacity: 1 },
@@ -420,10 +404,10 @@ const ITEMS_DEFAULT = [
   { id: 102, name: "3号車", type: "hourly", category: "rearcar", capacity: 1 },
   
   // Spaces (with actual capacity)
-  { id: 201, name: "旧館1F(111脚)", type: "hourly", category: "pipespace", capacity: 111 },
-  { id: 202, name: "新館1F(30脚)", type: "hourly", category: "pipespace", capacity: 30 },
-  { id: 203, name: "新館2F(19脚)", type: "hourly", category: "pipespace", capacity: 19 },
-  { id: 301, name: "デスクスペース(4つ)", type: "hourly", category: "deskspace", capacity: 4 }
+  { id: 201, name: "旧館1F", type: "hourly", category: "pipespace", capacity: 111 },
+  { id: 202, name: "新館1F", type: "hourly", category: "pipespace", capacity: 30 },
+  { id: 203, name: "新館2F", type: "hourly", category: "pipespace", capacity: 19 },
+  { id: 301, name: "デスクスペース", type: "hourly", category: "deskspace", capacity: 4 }
 ];
 
 function pad2(n){ return String(n).padStart(2,"0"); }
@@ -435,7 +419,7 @@ function escapeHtml(s){ return String(s||"").replace(/[&<>"']/g, c=>({"&":"&amp;
 function dayDiffInclusive(start, end){ return Math.floor((fromYmd(end).getTime()-fromYmd(start).getTime())/86400000)+1; }
 function overlapsMonth(start, end, mStart, mEnd){ return !(end < mStart || start > mEnd); }
 
-const ITEMS_KEY = "equip_items_v3";
+const ITEMS_KEY = "equip_items_v4";
 function loadItems(){
   let arr = [];
   try { arr = JSON.parse(localStorage.getItem(ITEMS_KEY) || "[]"); } catch(e){}
@@ -447,10 +431,9 @@ let ITEMS_DATA = loadItems();
 function findItem(id){ return ITEMS_DATA.find(x=>x.id==id); }
 
 /* =========================================================
-   2) 予約データ管理 (統合版)
+   2) 予約データ管理
 ========================================================= */
 const STORAGE_KEY = "equip_reservations_v4";
-
 function loadReservations(){ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
 function saveReservations(arr){ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
 function normalizeStatus(s){ return ["reserved","loan","returned"].includes(s) ? s : "reserved"; }
@@ -479,7 +462,6 @@ function renderAll(){
   else if(cat==="rearcar") limitPill.textContent = "予約可能：1ヶ月先月末まで(時間)";
   else limitPill.textContent = "予約可能：3ヶ月先月末まで(時間)";
 
-  // 予約表のタイトル
   document.getElementById("gridTitle").textContent = isAv ? "日 × 備品" : "日付 × 備品(場所)";
 
   renderStats(cat);
@@ -489,11 +471,11 @@ function renderAll(){
   requestAnimationFrame(ensureDoubleScroll);
 }
 
-// 【日単位】予約表（横軸:日付、縦軸:備品）
+// 【日単位】予約表
 function renderDailyGrid(){
   const {year, month} = getSelectedMonth();
   const dim = daysInMonth(year, month);
-  const items = ITEMS_DATA.filter(i => i.category === "av"); // 確実に70個
+  const items = ITEMS_DATA.filter(i => i.category === "av"); // 70個
   const resList = loadReservations();
 
   let thead = `<tr><th class="daily-sticky">備品</th>`;
@@ -504,8 +486,12 @@ function renderDailyGrid(){
   thead += `</tr>`;
 
   let tbody = "";
-  items.forEach(it => {
-    tbody += `<tr><td class="daily-sticky">${it.name}</td>`;
+  items.forEach((it, idx) => {
+    // ★ 備品名の横に番号（1から70）を表示
+    const displayNum = pad2(idx + 1);
+    const displayName = `<span style="font-size:11px; color:var(--muted); margin-right:6px; font-weight:bold;">${displayNum}.</span>${it.name}`;
+    
+    tbody += `<tr><td class="daily-sticky">${displayName}</td>`;
     for(let d=1; d<=dim; d++){
       const dateStr = `${year}-${pad2(month)}-${pad2(d)}`;
       const res = resList.find(r => r.itemId == it.id && r.date === dateStr);
@@ -513,9 +499,12 @@ function renderDailyGrid(){
       if(res){
         const isStart = (res.startDate === dateStr || d===1);
         const overdue = (res.status==="loan" && res.endDate < ymd(new Date())) ? "overdue" : "";
-        // 「済」を撤廃。伝票番号（または数量）のみを表示
+        // 伝票番号のみ表示。複数個の予約があれば数量も添える
         let cellText = "";
-        if(isStart) cellText = res.slipNo || (res.quantity > 1 ? `(${res.quantity})` : "");
+        if(isStart) {
+          cellText = res.slipNo || "";
+          if(res.quantity > 1) cellText += ` (${res.quantity})`;
+        }
         
         tbody += `<td class="cell ${res.status} ${overdue}" onclick="openModal('${res.id}')" title="数量: ${res.quantity||1}\n団体: ${res.group}\n期間: ${res.startDate}~${res.endDate}">${escapeHtml(cellText)}</td>`;
       } else {
@@ -528,7 +517,7 @@ function renderDailyGrid(){
   grid.innerHTML = `<thead>${thead}</thead><tbody>${tbody}</tbody>`;
 }
 
-// 【時間単位】予約表（横軸:時間、縦軸:日付×場所）
+// 【時間単位】予約表
 function renderHourlyGrid(category){
   const {year, month} = getSelectedMonth();
   const dim = daysInMonth(year, month);
@@ -548,7 +537,7 @@ function renderHourlyGrid(category){
     const dt = new Date(year, month-1, d);
     
     items.forEach((it, idx) => {
-      // 完全に無彩色（グレー）のシマシマ背景に
+      // グレー系のシマシマ背景
       let colorClass = idx % 2 === 0 ? "bg-row-a" : "bg-row-b";
 
       tbody += `<tr class="${colorClass}">`;
@@ -559,7 +548,7 @@ function renderHourlyGrid(category){
         const hourStr = `${pad2(h)}:00`;
         const nextHourStr = `${pad2(h+1)}:00`;
         
-        // その時間帯の予約をすべて取得（1マスに複数団体の予約が入る可能性があるため）
+        // 該当時間の予約をすべて抽出
         const overlaps = resList.filter(r => r.itemId == it.id && r.date === dateStr && (r.startTime < nextHourStr && r.endTime > hourStr));
 
         if(overlaps.length > 0){
@@ -568,19 +557,20 @@ function renderHourlyGrid(category){
           const status = statuses.includes("loan") ? "loan" : statuses.includes("reserved") ? "reserved" : "returned";
           const overdue = overlaps.some(r => r.status==="loan" && dateStr <= ymd(new Date()) && r.endTime < pad2(new Date().getHours())+":00") ? "overdue" : "";
           
+          // ★ ご要望のセルテキスト： 伝票番号 (予約数 / 総数)
+          let slipText = overlaps.map(r => r.slipNo).filter(Boolean).join(", ");
+          
           let cellText = "";
-          // ★「済」の代わりに、スペースなら「10/111」のような（予約数/総数）を表示
           if (isSpace) {
              const totalQty = overlaps.reduce((sum, r) => sum + (Number(r.quantity)||1), 0);
-             cellText = `${totalQty}/${it.capacity || 1}`;
+             if(slipText) cellText = `${slipText} (${totalQty}/${it.capacity || 1})`;
+             else cellText = `(${totalQty}/${it.capacity || 1})`;
           } else {
-             // リヤカー等の場合は、開始セルに伝票番号（なければ空）
-             if(isStart) cellText = overlaps[0].slipNo || '';
+             // リアカー等の場合は開始セルに伝票番号を表示
+             if(isStart) cellText = slipText;
           }
           
-          // ホバー時のツールチップ（複数ある場合は改行して表示）
           const titles = overlaps.map(r => `団体: ${r.group} (${r.quantity||1}個) ${r.startTime}~${r.endTime}`).join("\n");
-          
           tbody += `<td class="cell ${status} ${overdue}" onclick="openModal('${overlaps[0].id}')" title="${titles}">${escapeHtml(cellText)}</td>`;
         } else {
           tbody += `<td class="cell ${colorClass}" onclick="openNewModal(${it.id}, '${dateStr}', '${hourStr}')"></td>`;
@@ -592,53 +582,63 @@ function renderHourlyGrid(category){
   grid.innerHTML = `<thead>${thead}</thead><tbody>${tbody}</tbody>`;
 }
 
-// サマリー計算（カテゴリによって名称や計算式が自動で切り替わります）
+// サマリー計算（★ご要望に合わせて場所ごとにカードを分裂させます）
 function renderStats(cat){
-  const isSpace = (cat === "pipespace" || cat === "deskspace");
   const items = ITEMS_DATA.filter(i => i.category === cat);
-  
-  let total = 0, used = 0, loan = 0, overdue = 0;
-  const today = ymd(new Date());
-  const nowHour = pad2(new Date().getHours()) + ":00";
-  
-  if (isSpace) {
-      // スペースの場合は「脚数（個数）」で集計
-      total = items.reduce((sum, it) => sum + (Number(it.capacity) || 1), 0);
-      
-      loadReservations().forEach(r => {
-        if(!items.find(i=>i.id == r.itemId)) return;
-        // 「現在貸出中」の脚数をリアルタイム計算（今日＆現在時間が含まれているか）
-        if(r.date === today && r.status === "loan") {
-           if(r.startTime <= nowHour && nowHour < r.endTime) {
-              loan += (Number(r.quantity) || 1);
-           }
-        }
-      });
-      used = loan;
+  const statsGrid = document.getElementById("statsGrid");
+  statsGrid.innerHTML = "";
+
+  if(cat === "av") {
+    // 音響（AV）のときは従来の4カードを生成
+    let total = items.length;
+    let used = 0, loan = 0;
+    const today = ymd(new Date());
+    loadReservations().forEach(r => {
+      if(!items.find(i=>i.id == r.itemId)) return;
+      if(r.date === today || (r.startDate <= today && today <= r.endDate)){
+        used++;
+        if(r.status==="loan") loan++;
+      }
+    });
+    const avail = Math.max(0, total - used);
+    const { overdue: od } = countDueToday();
+
+    statsGrid.innerHTML = `
+      <div class="statCard"><div><div class="statTitle">総備品数</div><div class="statValue">${total}</div></div><div class="iconWrap blue"><svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg></div></div>
+      <div class="statCard"><div><div class="statTitle">本日利用可能</div><div class="statValue">${avail}</div></div><div class="iconWrap green"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M20 6 9 17l-5-5"></path></svg></div></div>
+      <div class="statCard"><div><div class="statTitle">貸出中（本日）</div><div class="statValue">${loan}</div></div><div class="iconWrap amber"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6l4 2"></path></svg></div></div>
+      <div class="statCard"><div><div class="statTitle">期限超過</div><div class="statValue">${od}</div></div><div class="iconWrap red"><svg viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></div></div>
+    `;
   } else {
-      // 音響やリヤカーの場合は「備品の数」で集計
-      total = items.length;
-      loadReservations().forEach(r => {
-        if(!items.find(i=>i.id == r.itemId)) return;
-        if(r.date === today || (r.startDate <= today && today <= r.endDate)){
-          used++;
-          if(r.status==="loan") loan++;
-        }
-      });
+    // ★パイプスペースやリアカーの場合は、場所ごとにカードを生成
+    const today = ymd(new Date());
+    const nowHour = pad2(new Date().getHours()) + ":00";
+    const unit = (cat === "pipespace" || cat === "deskspace") ? "脚(個)" : "台";
+
+    items.forEach(it => {
+        let loan = 0;
+        loadReservations().forEach(r => {
+            if(r.itemId === it.id && r.date === today && r.status === "loan") {
+               if(r.startTime <= nowHour && nowHour < r.endTime) loan += (Number(r.quantity) || 1);
+            }
+        });
+        const avail = Math.max(0, (it.capacity || 1) - loan);
+
+        statsGrid.innerHTML += `
+        <div class="statCard" style="display:block;">
+            <div class="statTitle" style="color:var(--primary); font-weight:800; border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:8px;">${it.name}</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+               <div>
+                 <div style="font-size:11.5px; color:var(--muted);">現在利用可能</div>
+                 <div class="statValue" style="font-size:26px; color:var(--ok);">${avail}<span style="font-size:13px; color:var(--text); font-weight:600;"> / ${it.capacity||1}</span></div>
+               </div>
+               <div style="text-align:right; font-size:12.5px; color:var(--muted);">
+                 現在貸出中: <span style="font-weight:bold; color:var(--warn);">${loan}</span> ${unit}
+               </div>
+            </div>
+        </div>`;
+    });
   }
-
-  // 表示ラベルの切り替え
-  document.getElementById("statTotalLabel").textContent = isSpace ? "総脚(個)数" : "総備品数";
-  document.getElementById("statAvailableLabel").textContent = isSpace ? "現在利用可能" : "本日利用可能";
-  document.getElementById("statLoanLabel").textContent = isSpace ? "現在貸出中" : "貸出中（本日）";
-
-  // 値のセット
-  document.getElementById("statTotal").textContent = total;
-  document.getElementById("statAvailable").textContent = Math.max(0, total - used);
-  document.getElementById("statLoan").textContent = loan;
-  
-  const { overdue: od } = countDueToday();
-  document.getElementById("statOverdue").textContent = od;
 }
 
 // ダブルスクロール同期
@@ -669,7 +669,7 @@ function renderList(){
     const iname = (it?it.name:"").toLowerCase();
     if(q && !iname.includes(q) && !(r.group||"").toLowerCase().includes(q) && !(r.slipNo||"").toLowerCase().includes(q)) return;
 
-    const key = it && it.category==="av" ? `${r.itemId}_${r.startDate}_${r.endDate}` : `${r.itemId}_${r.date}_${r.startTime}_${r.endTime}`;
+    const key = it && it.category==="av" ? `${r.itemId}_${r.startDate}_${r.endDate}_${r.group}` : `${r.itemId}_${r.date}_${r.startTime}_${r.endTime}_${r.group}`;
     if(!uniq.has(key)) uniq.set(key, {...r, ids: [r.id]});
     else uniq.get(key).ids.push(r.id);
   });
@@ -857,7 +857,6 @@ document.getElementById("modalSave").onclick = () => {
   let conflict = false;
   let conflictMsg = "すでに他の予約と被っています";
 
-  // 【高度な重複・総数チェック】
   targetIds.forEach(id => {
     let cur = fromYmd(start), endD = fromYmd(end);
     const it = findItem(id);
@@ -869,7 +868,6 @@ document.getElementById("modalSave").onclick = () => {
       
       let maxConcurrent = 0;
       let hStr = st;
-      // 30分ごとの使用数を計算し、総数を超えないかチェック
       while(hStr < et) {
           const usedNow = overlaps.filter(r => r.startTime <= hStr && r.endTime > hStr).reduce((sum, r) => sum + (Number(r.quantity)||1), 0);
           if (usedNow > maxConcurrent) maxConcurrent = usedNow;
