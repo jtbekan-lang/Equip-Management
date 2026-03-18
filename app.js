@@ -653,4 +653,80 @@ function renderItemsTable(){
 window.updateItemData = function(id){
   const nm = document.getElementById("iname_"+id).value.trim();
   const cap = parseInt(document.getElementById("icap_"+id).value) || 1;
-  if(!nm) return alert("空
+  if(!nm) return alert("空欄は不可です");
+  const it = ITEMS_DATA.find(i=>i.id==id);
+  it.name = nm; it.capacity = cap;
+  saveItems(ITEMS_DATA);
+  renderAll(); showToast("備品情報を更新しました", "ok");
+}
+
+document.getElementById("addItemBtn").onclick = () => {
+  const nm = document.getElementById("newItemName").value.trim();
+  const cap = parseInt(document.getElementById("newItemCapacity").value) || 1;
+  const cat = document.getElementById("newItemCategory").value;
+  if(!nm) return;
+  const newId = Math.max(...ITEMS_DATA.map(i=>i.id)) + 1;
+  ITEMS_DATA.push({ id: newId, name: nm, type: cat==="av"?"daily":"hourly", category: cat, capacity: cap });
+  saveItems(ITEMS_DATA);
+  document.getElementById("newItemName").value = "";
+  document.getElementById("newItemCapacity").value = "";
+  
+  document.querySelector(`.catbtn[data-cat="${cat}"]`).click(); 
+  renderItemsTable(); 
+  showToast("備品を追加しました", "ok");
+};
+
+const clearModal = document.getElementById("clearModal");
+document.getElementById("clearBtn").onclick = () => { document.getElementById("clearMonth").value=ymd(new Date()).slice(0,7); clearModal.showModal(); };
+document.getElementById("closeClearModal").onclick = () => clearModal.close();
+document.getElementById("clearCancelBtn").onclick = () => clearModal.close();
+
+document.getElementById("clearAllBtn").onclick = () => {
+  if(confirm("本当に全データを削除しますか？(復旧不可)")){
+    saveReservations([]); renderAll(); clearModal.close(); showToast("全データを削除しました", "ok");
+  }
+};
+document.getElementById("clearDoBtn").onclick = () => {
+  const m = document.getElementById("clearMonth").value;
+  if(!m) return;
+  const cutoff = m + "-31"; 
+  if(!confirm(`${m} までのデータを削除しますか？`)) return;
+  const next = loadReservations().filter(r => r.endDate > cutoff || r.date > cutoff);
+  saveReservations(next); renderAll(); clearModal.close(); showToast("期限までのデータを削除しました", "ok");
+};
+
+function countDueToday(){
+  const today = ymd(new Date());
+  let due = 0, overdue = 0;
+  loadReservations().forEach(r => {
+    if(r.status==="loan" && r.endDate === today) due++;
+    if(r.status==="loan" && r.endDate < today) overdue++;
+  });
+  return {due, overdue};
+}
+
+(function init(){
+  document.querySelectorAll(".tabbtn[data-tab]").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".tabbtn[data-tab]").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".tabpane").forEach(p=>p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.tab).classList.add("active");
+      if(btn.dataset.tab === "tabGrid") ensureDoubleScroll();
+    };
+  });
+  
+  document.querySelectorAll(".catbtn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".catbtn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      currentCategory = btn.dataset.cat; 
+      renderAll();
+    };
+  });
+  
+  monthPicker.value = ymd(new Date()).slice(0,7);
+  monthPicker.onchange = renderAll;
+  
+  renderAll();
+})();
