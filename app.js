@@ -181,7 +181,7 @@ function renderDailyGrid(){
         let cellText = "";
         if(isStart) {
           cellText = res.slipNo || "";
-          if(res.quantity > 1) cellText += ` (${res.quantity})`;
+          if(res.quantity > 1) cellText += ` (${res.quantity}個)`;
         }
         
         tbody += `<td class="cell ${res.status} ${overdue}" onclick="openModal('${res.id}')" title="数量: ${res.quantity||1}\n団体: ${res.group}\n期間: ${res.startDate}~${res.endDate}">${escapeHtml(cellText)}</td>`;
@@ -260,20 +260,21 @@ function renderHourlyGrid(category){
 
           skipUntil = h + colspan; 
 
-          // 単位付きの文字列生成
           let slipText = overlaps.map(r => r.slipNo).filter(Boolean).join(", ");
           let cellText = "";
-          let unit = (category === "pipespace") ? "脚" : (category === "deskspace" || category === "rearcar") ? "台" : "";
+          let unit = (category === "pipespace") ? "脚" : (category === "deskspace" || category === "rearcar") ? "台" : "個";
+          // 黒文字で強調する単位のHTMLを作成
+          let unitHtml = `<span style="color:#0f172a; font-weight:bold;">${unit}</span>`;
 
           if (isSpace || category === "rearcar") {
              const totalQty = overlaps.reduce((sum, r) => sum + (Number(r.quantity)||1), 0);
-             cellText = slipText ? `${slipText} (${totalQty}${unit}/${it.capacity || 1}${unit})` : `(${totalQty}${unit}/${it.capacity || 1}${unit})`;
+             cellText = slipText ? `${slipText} (${totalQty}${unitHtml}/${it.capacity || 1}${unitHtml})` : `(${totalQty}${unitHtml}/${it.capacity || 1}${unitHtml})`;
           } else {
              cellText = slipText; 
           }
           
           const titles = overlaps.map(r => `団体: ${r.group} (${r.quantity||1}${unit}) ${r.startTime}~${r.endTime}`).join("\n");
-          tbody += `<td colspan="${colspan}" class="cell ${status} ${overdue}" onclick="openModal('${baseResId}')" title="${titles}" style="text-align:center;">${escapeHtml(cellText)}</td>`;
+          tbody += `<td colspan="${colspan}" class="cell ${status} ${overdue}" onclick="openModal('${baseResId}')" title="${titles}" style="text-align:center;">${escapeHtml(cellText) || cellText}</td>`;
         } else {
           tbody += `<td class="cell ${colorClass}" onclick="openNewModal(${it.id}, '${dateStr}', '${hourStr}')"></td>`;
         }
@@ -322,7 +323,7 @@ function renderStats(cat){
   } else {
     const today = ymd(new Date());
     const nowHour = pad2(new Date().getHours()) + ":00";
-    const unit = (cat === "pipespace" || cat === "deskspace") ? "脚" : "台"; // 単位を動的に設定
+    const unit = (cat === "pipespace") ? "脚" : (cat === "deskspace" || cat === "rearcar") ? "台" : "個";
 
     items.forEach(it => {
         let loan = 0;
@@ -342,7 +343,7 @@ function renderStats(cat){
                  <div class="statValue" style="font-size:26px; color:var(--ok);">${avail}<span style="font-size:13px; color:var(--text); font-weight:600;"> / ${it.capacity||1}</span></div>
                </div>
                <div style="text-align:right; font-size:12.5px; color:var(--muted);">
-                 現在貸出中: <span style="font-weight:bold; color:var(--warn);">${loan}</span> ${unit}
+                 現在貸出中: <span style="font-weight:bold; color:var(--warn);">${loan}</span> <span style="color:#0f172a; font-weight:bold;">${unit}</span>
                </div>
             </div>
         </div>`;
@@ -398,11 +399,14 @@ function renderList(){
     cb.checked = listSelectedKeys.has(r.id);
     listRowPayload.set(r.id, r.ids);
 
+    // リストの数量にも単位を付与
+    let unit = (it && it.category === "pipespace") ? "脚" : (it && (it.category === "deskspace" || it.category === "rearcar")) ? "台" : "個";
+
     tr.innerHTML = `
       <td></td>
       <td>${timeStr}</td>
       <td>${it?it.name:"不明"}</td>
-      <td>${r.quantity || 1}</td>
+      <td>${r.quantity || 1} <span style="color:#0f172a; font-weight:bold;">${unit}</span></td>
       <td>${escapeHtml(r.group)}</td>
       <td>${escapeHtml(r.slipNo)}</td>
       <td><span class="badge ${r.status}">${statusLabel(r.status)}</span></td>
@@ -509,6 +513,10 @@ function toggleModalInputs(cat){
   document.getElementById("dailyInputs").style.display = isAv ? "block" : "none";
   document.getElementById("hourlyInputs").style.display = isAv ? "none" : "flex";
   document.getElementById("multiContainer").style.display = "block";
+
+  // モーダル入力欄の単位を動的に変更
+  let unit = (cat === "pipespace") ? "脚" : (cat === "deskspace" || cat === "rearcar") ? "台" : "個";
+  document.getElementById("modalUnit").textContent = unit;
 }
 
 function populateModalSelects(){
@@ -619,7 +627,6 @@ document.getElementById("closeModalBtn").onclick = () => modal.close();
 
 const itemsModal = document.getElementById("itemsModal");
 
-// 「備品管理」ボタン押下時：AVカテゴリ以外は追加セクションを非表示に
 document.getElementById("itemsBtn").onclick = () => { 
   document.getElementById("addItemSection").style.display = (currentCategory === "av") ? "block" : "none";
   renderItemsTable(); 
@@ -646,80 +653,4 @@ function renderItemsTable(){
 window.updateItemData = function(id){
   const nm = document.getElementById("iname_"+id).value.trim();
   const cap = parseInt(document.getElementById("icap_"+id).value) || 1;
-  if(!nm) return alert("空欄は不可です");
-  const it = ITEMS_DATA.find(i=>i.id==id);
-  it.name = nm; it.capacity = cap;
-  saveItems(ITEMS_DATA);
-  renderAll(); showToast("備品情報を更新しました", "ok");
-}
-
-document.getElementById("addItemBtn").onclick = () => {
-  const nm = document.getElementById("newItemName").value.trim();
-  const cap = parseInt(document.getElementById("newItemCapacity").value) || 1;
-  const cat = document.getElementById("newItemCategory").value;
-  if(!nm) return;
-  const newId = Math.max(...ITEMS_DATA.map(i=>i.id)) + 1;
-  ITEMS_DATA.push({ id: newId, name: nm, type: cat==="av"?"daily":"hourly", category: cat, capacity: cap });
-  saveItems(ITEMS_DATA);
-  document.getElementById("newItemName").value = "";
-  document.getElementById("newItemCapacity").value = "";
-  
-  document.querySelector(`.catbtn[data-cat="${cat}"]`).click(); 
-  renderItemsTable(); 
-  showToast("備品を追加しました", "ok");
-};
-
-const clearModal = document.getElementById("clearModal");
-document.getElementById("clearBtn").onclick = () => { document.getElementById("clearMonth").value=ymd(new Date()).slice(0,7); clearModal.showModal(); };
-document.getElementById("closeClearModal").onclick = () => clearModal.close();
-document.getElementById("clearCancelBtn").onclick = () => clearModal.close();
-
-document.getElementById("clearAllBtn").onclick = () => {
-  if(confirm("本当に全データを削除しますか？(復旧不可)")){
-    saveReservations([]); renderAll(); clearModal.close(); showToast("全データを削除しました", "ok");
-  }
-};
-document.getElementById("clearDoBtn").onclick = () => {
-  const m = document.getElementById("clearMonth").value;
-  if(!m) return;
-  const cutoff = m + "-31"; 
-  if(!confirm(`${m} までのデータを削除しますか？`)) return;
-  const next = loadReservations().filter(r => r.endDate > cutoff || r.date > cutoff);
-  saveReservations(next); renderAll(); clearModal.close(); showToast("期限までのデータを削除しました", "ok");
-};
-
-function countDueToday(){
-  const today = ymd(new Date());
-  let due = 0, overdue = 0;
-  loadReservations().forEach(r => {
-    if(r.status==="loan" && r.endDate === today) due++;
-    if(r.status==="loan" && r.endDate < today) overdue++;
-  });
-  return {due, overdue};
-}
-
-(function init(){
-  document.querySelectorAll(".tabbtn[data-tab]").forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll(".tabbtn[data-tab]").forEach(b=>b.classList.remove("active"));
-      document.querySelectorAll(".tabpane").forEach(p=>p.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById(btn.dataset.tab).classList.add("active");
-      if(btn.dataset.tab === "tabGrid") ensureDoubleScroll();
-    };
-  });
-  
-  document.querySelectorAll(".catbtn").forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll(".catbtn").forEach(b=>b.classList.remove("active"));
-      btn.classList.add("active");
-      currentCategory = btn.dataset.cat; 
-      renderAll();
-    };
-  });
-  
-  monthPicker.value = ymd(new Date()).slice(0,7);
-  monthPicker.onchange = renderAll;
-  
-  renderAll();
-})();
+  if(!nm) return alert("空
