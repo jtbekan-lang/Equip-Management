@@ -123,10 +123,15 @@
         <div style="min-width:160px;">
           <label style="margin:0 0 6px;">表示カテゴリ</label>
           <select id="categorySelect" style="font-weight:bold; color:var(--primary); border-color:var(--primary);">
-            <option value="av">備品 (日単位)</option>
-            <option value="rearcar">リヤカー (時間単位)</option>
-            <option value="pipespace">パイプスペース (時間単位)</option>
-            <option value="deskspace">デスクスペース (時間単位)</option>
+            <div style="min-width:160px;">
+              <label style="margin:0 0 6px;">表示カテゴリ</label>
+              <div class="tabs" id="categoryButtons" style="margin-top:0;">
+                <button class="tabbtn catbtn active" data-cat="av">備品(日)</button>
+                <button class="tabbtn catbtn" data-cat="rearcar">リヤカー(時)</button>
+                <button class="tabbtn catbtn" data-cat="pipespace">パイプ(時)</button>
+                <button class="tabbtn catbtn" data-cat="deskspace">デスク(時)</button>
+              </div>
+            </div>
           </select>
         </div>
         <div style="min-width:140px;">
