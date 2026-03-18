@@ -263,17 +263,17 @@ function renderHourlyGrid(category){
           let slipText = overlaps.map(r => r.slipNo).filter(Boolean).join(", ");
           let cellText = "";
           let unit = (category === "pipespace") ? "脚" : (category === "deskspace" || category === "rearcar") ? "台" : "個";
-          let unitHtml = `<span style="color:#0f172a; font-weight:bold;">${unit}</span>`;
 
           if (isSpace || category === "rearcar") {
              const totalQty = overlaps.reduce((sum, r) => sum + (Number(r.quantity)||1), 0);
-             cellText = slipText ? `${slipText} (${totalQty}${unitHtml}/${it.capacity || 1}${unitHtml})` : `(${totalQty}${unitHtml}/${it.capacity || 1}${unitHtml})`;
+             // HTMLタグを削除し、文字の「脚」「台」のみをつなげる
+             cellText = slipText ? `${slipText} (${totalQty}${unit}/${it.capacity || 1}${unit})` : `(${totalQty}${unit}/${it.capacity || 1}${unit})`;
           } else {
              cellText = slipText; 
           }
           
           const titles = overlaps.map(r => `団体: ${r.group} (${r.quantity||1}${unit}) ${r.startTime}~${r.endTime}`).join("\n");
-          tbody += `<td colspan="${colspan}" class="cell ${status} ${overdue}" onclick="openModal('${baseResId}')" title="${titles}" style="text-align:center;">${escapeHtml(cellText) || cellText}</td>`;
+          tbody += `<td colspan="${colspan}" class="cell ${status} ${overdue}" onclick="openModal('${baseResId}')" title="${titles}" style="text-align:center;">${escapeHtml(cellText)}</td>`;
         } else {
           tbody += `<td class="cell ${colorClass}" onclick="openNewModal(${it.id}, '${dateStr}', '${hourStr}')"></td>`;
         }
