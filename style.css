@@ -50,51 +50,57 @@ button.danger{ background: linear-gradient(135deg, rgba(225,29,72,.10), rgba(225
 .iconWrap{ width:44px;height:44px;border-radius:14px; display:grid;place-items:center; border:1px solid rgba(15,23,42,.06); }
 .iconWrap.blue{background: rgba(37,99,235,.10)} .iconWrap.green{background: rgba(22,163,74,.12)} .iconWrap.amber{background: rgba(245,158,11,.14)} .iconWrap.red{background: rgba(225,29,72,.10)} .iconWrap svg{width:22px;height:22px}
 
-/* ▼ 変更点：横幅を画面全体(100%)にフィットさせる設定 */
 .tableWrap{ overflow-x:auto; border-radius:14px; border:1px solid var(--border); background:#fff; box-shadow: var(--shadow2); max-height: calc(100vh - 360px); }
 @media (max-width:520px){ .tableWrap{max-height: calc(100vh - 380px);} }
 
-table{ border-collapse:separate; border-spacing:0; table-layout:fixed; width:100%; background:#fff; font-size:11.5px; color:#0f172a; }
-
-/* ▼ 変更点：高さを36pxで固定し、枠が広がらないようにする設定 */
+/* ▼ 変更点：表全体を黒枠(格子)にする */
+table{ 
+  border-collapse:separate; border-spacing:0; table-layout:fixed; width:100%; 
+  background:#fff; font-size:11.5px; color:#0f172a; 
+  border-left: 1px solid #000; border-top: 1px solid #000;
+}
 th,td{ 
-  border-bottom:1px solid var(--border); border-right:1px solid var(--border); 
+  border-bottom:1px solid #000; border-right:1px solid #000; 
   padding:4px; vertical-align:middle; text-align:center; 
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   height: 36px;
 }
-thead th{ position:sticky; top:0; z-index:10; background:#f1f5f9; font-weight:700; }
+thead th{ position:sticky; top:0; z-index:10; background:#f1f5f9; font-weight:700; border-bottom: 1px solid #000; }
 thead tr:nth-child(2) th{ top:30px; font-weight:650; color:#475569; background:#f8fafc; }
 
+/* ▼ 変更点：予約の色が最前面に出るよう !important を付与 */
 td.cell{cursor:pointer;position:relative; font-size:11.5px; transition: filter 0.1s;}
-td.cell.reserved{background:var(--reservedBg)} td.cell.loan{background:var(--loanBg)} td.cell.returned{background:var(--returnedBg)} 
+td.cell.reserved{background:var(--reservedBg) !important;} 
+td.cell.loan{background:var(--loanBg) !important;} 
+td.cell.returned{background:var(--returnedBg) !important;} 
 td.cell:hover{ filter: brightness(0.92); z-index: 1; }
 td.cell.overdue{ outline:2px solid var(--overdue); outline-offset:-2px; }
 
-/* ▼ 変更点：左側の列幅を調整し、残りのセルが画面にフィットするようにする */
-.daily-sticky { width:160px; min-width:160px; max-width:160px; position:sticky; left:0; z-index:5; background:#fff; border-right:1px solid var(--border2); text-align:left; }
+/* 固定列の境界線も黒にする */
+.daily-sticky { width:160px; min-width:160px; max-width:160px; position:sticky; left:0; z-index:5; background:#fff; border-right:1px solid #000; text-align:left; }
 thead .daily-sticky { z-index:15; background:#f1f5f9; text-align:center; }
 
-.hourly-sticky-date { width:50px; min-width:50px; max-width:50px; position:sticky; left:0; z-index:5; background:#f8fafc; border-right:2px solid var(--border2); font-weight:bold; }
-.hourly-sticky-item { width:120px; min-width:120px; max-width:120px; position:sticky; left:50px; z-index:5; background:#fff; border-right:1px solid var(--border2); text-align:left; }
+.hourly-sticky-date { width:50px; min-width:50px; max-width:50px; position:sticky; left:0; z-index:5; background:#f8fafc; border-right:1px solid #000; font-weight:bold; }
+.hourly-sticky-item { width:120px; min-width:120px; max-width:120px; position:sticky; left:50px; z-index:5; background:#fff; border-right:1px solid #000; text-align:left; }
+thead .hourly-sticky-date, thead .hourly-sticky-item { z-index:15; background:#f1f5f9; text-align:center; }
 
-thead .hourly-sticky-date, thead .hourly-sticky-item { z-index:15; background:#f1f5f9; text-align:center; border-bottom: 1px solid var(--border2); }
+.bg-row-a { background-color: #f1f5f9; }
+.bg-row-b { background-color: #f8fafc; }
+.bg-row-today { background-color: #fffbeb; } 
 
-.bg-row-a { background-color: #f1f5f9 !important; }
-.bg-row-b { background-color: #f8fafc !important; }
-.bg-row-today { background-color: #fffbeb !important; } 
-
-/* ▼ 変更点：土日の色を備品側と揃え、より濃く見やすく設定 */
-.bg-sat { background-color: #dbeafe !important; }
-.text-sat { color: #1e40af !important; font-weight:800; }
-.bg-sun { background-color: #fee2e2 !important; }
-.text-sun { color: #991b1b !important; font-weight:800; }
+/* 土日の色（!importantを外して、予約色が上書きできるようにする） */
+.bg-sat { background-color: #dbeafe; }
+.text-sat { color: #1e40af; font-weight:800; }
+.bg-sun { background-color: #fee2e2; }
+.text-sun { color: #991b1b; font-weight:800; }
 
 .topScroll{ overflow-x:auto; overflow-y:hidden; height:14px; border:1px solid var(--border); border-radius:12px; background:#fff; box-shadow: var(--shadow2); }
 #topScrollInner{height:1px;}
 
+/* 予約一覧タブ側の表は元の線を維持 */
 .listTable{ width:100%; border:1px solid var(--border); border-radius:14px; overflow:hidden; background:#fff; box-shadow: var(--shadow2); }
-.listTable table{width:100%;min-width:960px;background:#fff; table-layout:auto;}
+.listTable table{width:100%;min-width:960px;background:#fff; table-layout:auto; border:none;}
+.listTable th, .listTable td { border-bottom:1px solid var(--border); border-right:1px solid var(--border); }
 .listTable th{background:#f1f5f9;position:sticky;top:0;z-index:2}
 .listTable th,.listTable td{padding:10px;font-size:14px; text-align:center; vertical-align:middle; height:auto;}
 .statusBtn{ width:auto; padding:8px 12px; border-radius:12px; border:1px solid var(--border); background:#fff; font-size:12.5px; font-weight:800; cursor:pointer; }
