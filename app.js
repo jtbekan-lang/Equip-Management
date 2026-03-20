@@ -54,14 +54,15 @@ function showToast(msg, type){
   setTimeout(()=>t.classList.remove("show"), 3000);
 }
 
+// 予約可能期限を動的に取得する関数
 function getLimitText(category) {
   const d = new Date();
-  if(category === "av" || category === "rearcar") d.setMonth(d.getMonth() + 2, 0); // 1ヶ月先の月末
-  else d.setMonth(d.getMonth() + 4, 0); // 3ヶ月先の月末
+  if(category === "av" || category === "rearcar") d.setMonth(d.getMonth() + 2, 0); 
+  else d.setMonth(d.getMonth() + 4, 0); 
   return `${d.getMonth()+1}月${d.getDate()}日`;
 }
 
-const ITEMS_KEY = "equip_items_v5"; // IDマッピングが変わったのでクリアのためキー変更
+const ITEMS_KEY = "equip_items_v5"; 
 function loadItems(){
   let arr = [];
   try { arr = JSON.parse(localStorage.getItem(ITEMS_KEY) || "[]"); } catch(e){}
@@ -99,21 +100,20 @@ function renderAll(){
   const cat = currentCategory;
   const isAv = (cat === "av");
   
-  // 予約可能期限とタブ名の動的変更
   const limitPill = document.getElementById("limitPill");
   const tabBtn = document.getElementById("tabListBtn");
   
   if(cat === "av") {
-      limitPill.textContent = `予約可能：${getLimitText(cat)} まで`;
+      limitPill.textContent = `予約可能：1ヶ月先の月末（${getLimitText(cat)}）まで`;
       tabBtn.textContent = "貸出中備品一覧";
   } else if(cat === "rearcar") {
-      limitPill.textContent = `予約可能：${getLimitText(cat)} まで`;
+      limitPill.textContent = `予約可能：1ヶ月先の月末（${getLimitText(cat)}）まで`;
       tabBtn.textContent = "貸出中台数一覧";
   } else if(cat === "pipespace") {
-      limitPill.textContent = `予約可能：${getLimitText(cat)} まで`;
+      limitPill.textContent = `予約可能：3ヶ月先の月末（${getLimitText(cat)}）まで`;
       tabBtn.textContent = "貸出中脚数一覧";
   } else {
-      limitPill.textContent = `予約可能：${getLimitText(cat)} まで`;
+      limitPill.textContent = `予約可能：3ヶ月先の月末（${getLimitText(cat)}）まで`;
       tabBtn.textContent = "貸出中台数一覧";
   }
 
@@ -142,7 +142,6 @@ function renderDailyGrid(){
 
   let tbody = "";
   items.forEach((it, idx) => {
-    // 備品リストが長いため、11pxから10pxに変更して調整
     const displayName = `<span style="font-size:10px;">${it.name}</span>`;
     
     tbody += `<tr><td class="daily-sticky">${displayName}</td>`;
@@ -172,7 +171,6 @@ function renderDailyGrid(){
   grid.innerHTML = `<thead>${thead}</thead><tbody>${tbody}</tbody>`;
 }
 
-// 時間単位グリッド（30分刻み化）
 function renderHourlyGrid(category){
   const {year, month} = getSelectedMonth();
   const dim = daysInMonth(year, month);
@@ -181,13 +179,13 @@ function renderHourlyGrid(category){
   const isSpace = (category === "pipespace" || category === "deskspace");
   const todayStr = ymd(new Date());
 
-  // 30分ごとの時間枠を作成（9:00〜20:30 の 24枠）
+  // 30分刻みの時間枠を生成（9:00 〜 20:30）
   const timeSlots = [];
   for(let h=9; h<=20; h++) {
     timeSlots.push(`${pad2(h)}:00`);
     timeSlots.push(`${pad2(h)}:30`);
   }
-  timeSlots.push("21:00"); // 最後の終点用
+  timeSlots.push("21:00"); // 終点計算用
 
   let thead = `<tr><th class="hourly-sticky-date">日付</th><th class="hourly-sticky-item">場所/備品</th>`;
   for(let i=0; i<timeSlots.length-1; i++) {
@@ -206,7 +204,7 @@ function renderHourlyGrid(category){
     const isToday = (dateStr === todayStr);
     
     items.forEach((it, idx) => {
-      // 土日の行に色を付ける
+      // 土日の色は列全体ではなく行全体に適用して色を揃える
       let colorClass = isToday ? "bg-row-today" : isSat ? "bg-sat" : isSun ? "bg-sun" : (idx % 2 === 0 ? "bg-row-a" : "bg-row-b");
 
       const rowIdStr = (isToday && idx === 0) ? `id="today-row"` : "";
@@ -234,11 +232,11 @@ function renderHourlyGrid(category){
           const baseResId = overlaps[0].id; 
           const statuses = overlaps.map(r=>r.status);
           const status = statuses.includes("loan") ? "loan" : statuses.includes("reserved") ? "reserved" : "returned";
-          // 期限超過チェック
+          
           const nowTimeStr = pad2(new Date().getHours())+":"+pad2(new Date().getMinutes());
           const overdue = overlaps.some(r => r.status==="loan" && dateStr <= todayStr && r.endTime <= nowTimeStr) ? "overdue" : "";
 
-          // セルをどこまで結合するか判定
+          // 後続のセルが同じ予約なら結合する
           for(let j = i+1; j < timeSlots.length-1; j++) {
               const checkHourStr = timeSlots[j];
               const checkNextHourStr = timeSlots[j+1];
@@ -451,21 +449,20 @@ function openNewModal(itemId, dateStr, hourStr = "09:00"){
   
   const it = findItem(itemId);
   document.getElementById("modalTitle").textContent = `${dateStr} の新規予約`;
-  document.getElementById("modalItem").value = itemId; // 隠しフィールドにセット
-  document.getElementById("modalItemNameDisplay").textContent = it.name; // 表示用にセット
+  document.getElementById("modalItem").value = itemId; 
+  document.getElementById("modalItemNameDisplay").textContent = it.name; 
   
   document.getElementById("modalStart").value = dateStr;
   document.getElementById("modalEnd").value = dateStr;
   document.getElementById("modalStartTime").value = hourStr;
   
-  // 初期終了時間を30分後にセット
   let [hh, mm] = hourStr.split(":").map(Number);
   mm += 30; if(mm>=60){ hh++; mm-=60; }
   document.getElementById("modalEndTime").value = `${pad2(hh)}:${pad2(mm)}`;
   
   document.getElementById("modalGroup").value = "";
   document.getElementById("modalQuantity").value = "1";
-  document.getElementById("modalQuantity").max = it.capacity || 1; // 上限をセット
+  document.getElementById("modalQuantity").max = it.capacity || 1; 
   document.getElementById("modalSlip").value = "";
   document.getElementById("modalStatus").value = "reserved";
   
@@ -496,7 +493,7 @@ function openModal(id){
   document.getElementById("modalEndTime").value = res.endTime;
   document.getElementById("modalGroup").value = res.group;
   document.getElementById("modalQuantity").value = res.quantity || 1;
-  document.getElementById("modalQuantity").max = it.capacity || 1; // 上限をセット
+  document.getElementById("modalQuantity").max = it.capacity || 1; 
   document.getElementById("modalSlip").value = res.slipNo;
   document.getElementById("modalStatus").value = res.status;
   
@@ -511,10 +508,8 @@ function toggleModalInputs(cat){
   const isAv = (cat === "av");
   document.getElementById("dailyInputs").style.display = isAv ? "block" : "none";
   document.getElementById("hourlyInputs").style.display = isAv ? "none" : "flex";
-  // 複数予約は備品（av）の時だけ表示
   document.getElementById("multiContainer").style.display = isAv ? "block" : "none";
 
-  // パイプスペース以外は数量を非表示にする
   if(cat === "pipespace") {
       document.getElementById("quantityContainer").style.display = "block";
       document.getElementById("modalUnit").textContent = "脚";
@@ -554,13 +549,18 @@ document.getElementById("modalSave").onclick = () => {
   const slipNo = document.getElementById("modalSlip").value.trim();
   const status = document.getElementById("modalStatus").value;
   
-  // バリデーション追加
   if(!group) return msg.textContent = "団体名を入れてください";
-  if(!slipNo) return msg.textContent = "伝票番号を入れてください"; // 伝票番号を必須化
+  if(!slipNo) return msg.textContent = "伝票番号を入れてください";
   if(baseItem.category!=="av" && (st>=et)) return msg.textContent = "正しい時間を入力してください";
   if(dayDiffInclusive(start, end) > 7) return msg.textContent = "最大7日までです";
 
-  // パイプスペース以外は数量を強制的に1として保存
+  // ▼ 変更点：時間外警告の追加
+  if(baseItem.category !== "av") {
+      if(st < "09:00" || et > "21:00" || (st === "21:00" && et > "21:00")) {
+          if(!confirm("時間外の施設利用ですが、本当によろしいでしょうか？")) return;
+      }
+  }
+
   let quantity = 1;
   if(baseItem.category === "pipespace") {
       quantity = parseInt(document.getElementById("modalQuantity").value) || 1;
@@ -711,6 +711,15 @@ function countDueToday(){
 }
 
 (function init(){
+  // ▼ 変更点：30分刻みの時間オプションを生成
+  const timeSelects = [document.getElementById("modalStartTime"), document.getElementById("modalEndTime")];
+  let timeOptionsHTML = "";
+  for(let h=0; h<=23; h++){
+    timeOptionsHTML += `<option value="${pad2(h)}:00">${pad2(h)}:00</option>`;
+    timeOptionsHTML += `<option value="${pad2(h)}:30">${pad2(h)}:30</option>`;
+  }
+  timeSelects.forEach(sel => sel.innerHTML = timeOptionsHTML);
+
   document.querySelectorAll(".tabbtn[data-tab]").forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll(".tabbtn[data-tab]").forEach(b=>b.classList.remove("active"));
