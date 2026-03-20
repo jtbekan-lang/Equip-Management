@@ -16,10 +16,10 @@
         <div style="min-width:320px;">
           <label style="margin:0 0 6px;">表示カテゴリ</label>
           <div class="tabs" style="margin-top:0;">
-            <button class="tabbtn catbtn active" data-cat="av">備品(日)</button>
-            <button class="tabbtn catbtn" data-cat="rearcar">リヤカー(時)</button>
-            <button class="tabbtn catbtn" data-cat="pipespace">パイプ(時)</button>
-            <button class="tabbtn catbtn" data-cat="deskspace">デスク(時)</button>
+            <button class="tabbtn catbtn active" data-cat="av">備品</button>
+            <button class="tabbtn catbtn" data-cat="rearcar">リヤカー</button>
+            <button class="tabbtn catbtn" data-cat="pipespace">パイプ</button>
+            <button class="tabbtn catbtn" data-cat="deskspace">デスク</button>
           </div>
         </div>
         <div style="min-width:140px;">
@@ -32,14 +32,14 @@
       <span class="pill">
         色： <span class="badge reserved">予約</span> <span class="badge loan">貸出中</span> <span class="badge returned">返却済</span> <span class="badge overdue" style="margin-left:6px;">期限超過</span>
       </span>
-      <span class="pill" id="limitPill">予約可能：—</span>
+      <span class="pill" id="limitPill" style="font-weight:bold; color:var(--primary);">予約可能：—</span>
       <button id="itemsBtn">備品管理</button>
       <button id="notifBtn">返却通知ON</button>
       <button id="clearBtn" class="danger">全データ削除</button>
     </div>
     <div class="tabs" role="tablist">
       <button class="tabbtn active" data-tab="tabGrid">予約表</button>
-      <button class="tabbtn" data-tab="tabList">一覧</button>
+      <button class="tabbtn" data-tab="tabList" id="tabListBtn">貸出中備品一覧</button>
     </div>
   </div>
 </header>
@@ -64,7 +64,7 @@
         <div style="font-weight:800; font-size:16px;">予約一覧</div>
         <div style="margin-top:12px;">
           <label>検索（備品名 / 団体名 / 伝票）</label>
-          <input id="searchInput" placeholder="例：マイク / IPC / A-12345" />
+          <input id="searchInput" placeholder="例：マイク / IPC / 10" />
         </div>
         <div class="subrow" style="margin-top:12px;">
           <span class="pill" id="listSelPill">選択：0件</span>
@@ -105,7 +105,11 @@
     <button class="xbtn" id="closeModalBtn">✕</button>
   </div>
   <div class="modalBody">
-    <div><label>備品 / 場所</label><select id="modalItem"></select></div>
+    <div style="margin-bottom:6px;">
+      <label>備品 / 場所</label>
+      <div id="modalItemNameDisplay" style="font-weight:bold; font-size:15px; padding:8px 12px; background:#f1f5f9; border:1px solid var(--border); border-radius:8px;"></div>
+      <input type="hidden" id="modalItem" />
+    </div>
 
     <div id="multiContainer">
       <label style="display:flex; align-items:center; gap:10px; margin-bottom:0;">
@@ -113,7 +117,7 @@
       </label>
       <div id="multiWrap" style="display:none; margin-top:10px; border:1px solid var(--border); border-radius:12px; padding:10px; background:#f8fafc;">
         <label>備品を検索（複数選択）</label>
-        <input id="multiSearch" placeholder="例：ワイヤレス / 2号車" />
+        <input id="multiSearch" placeholder="例：ワイヤレス" />
         <div class="hint">※同じカテゴリの備品のみ一括登録できます。</div>
         <div style="display:flex; gap:10px; margin-top:10px;">
           <button type="button" id="multiAllBtn">全選択</button>
@@ -138,17 +142,18 @@
 
     <div style="display:flex; gap:10px;">
       <div style="flex:3;"><label>団体名</label><input id="modalGroup" placeholder="例：軽音楽研究会IPC" /></div>
-      <div style="flex:1;">
+      
+      <div style="flex:1;" id="quantityContainer">
         <label>数量</label>
         <div style="display:flex; align-items:center;">
           <input id="modalQuantity" type="number" min="1" placeholder="1" />
-          <span id="modalUnit" style="margin-left:6px; font-weight:bold; color:#0f172a; white-space:nowrap;">個</span>
+          <span id="modalUnit" style="margin-left:6px; font-weight:bold; color:#0f172a; white-space:nowrap;">脚</span>
         </div>
       </div>
     </div>
     
     <div><label>状態</label><select id="modalStatus"><option value="reserved">予約（未貸出）</option><option value="loan">貸出中</option><option value="returned">返却済</option></select></div>
-    <div><label>伝票番号（任意）</label><input id="modalSlip" placeholder="例：A-12345" /></div>
+    <div><label>伝票番号（必須）</label><input id="modalSlip" placeholder="例：10" /></div>
     <div id="modalMsg" class="msg"></div>
   </div>
   <div class="modalFoot">
