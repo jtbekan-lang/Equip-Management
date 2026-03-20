@@ -54,7 +54,6 @@ function showToast(msg, type){
   setTimeout(()=>t.classList.remove("show"), 3000);
 }
 
-// ▼ 変更点：期限を正確な「日付（Date）」で取得する関数を追加
 function getLimitDate(category) {
   const d = new Date();
   if(category === "av" || category === "rearcar") d.setMonth(d.getMonth() + 2, 0); 
@@ -62,7 +61,6 @@ function getLimitDate(category) {
   return d;
 }
 
-// 期限を「テキスト」で取得する関数
 function getLimitText(category) {
   const d = getLimitDate(category);
   return `${d.getMonth()+1}月${d.getDate()}日`;
@@ -294,7 +292,6 @@ function renderHourlyGrid(category){
   }
 }
 
-// ▼ 変更点：本日の貸出の集計方法を「件数・日数」から「ユニークな備品の個数」に修正
 function renderStats(cat){
   const items = ITEMS_DATA.filter(i => i.category === cat);
   const statsGrid = document.getElementById("statsGrid");
@@ -308,7 +305,6 @@ function renderStats(cat){
     const loanItems = new Set();
 
     loadReservations().forEach(r => {
-      // 本日の予約データかつ、avカテゴリの備品である場合のみ
       if(r.date === today && items.some(i => i.id == r.itemId)){
         usedItems.add(r.itemId);
         if(r.status === "loan") loanItems.add(r.itemId);
@@ -374,9 +370,16 @@ function renderList(){
   const mStart = `${year}-${pad2(month)}-01`, mEnd = `${year}-${pad2(month)}-${pad2(daysInMonth(year, month))}`;
   const q = searchInput.value.trim().toLowerCase();
   
+  // ▼ 変更点：チェックボックスがONかどうかを取得
+  const onlyUnreturned = document.getElementById("filterUnreturned").checked;
+  
   const uniq = new Map();
   loadReservations().forEach(r => {
     if(!overlapsMonth(r.startDate, r.endDate, mStart, mEnd)) return;
+    
+    // ▼ 変更点：「未返却のみ表示」がONの時は「貸出中（loan）」以外を除外
+    if(onlyUnreturned && r.status !== "loan") return;
+
     const it = findItem(r.itemId);
     
     if(!it || it.category !== currentCategory) return;
@@ -454,7 +457,10 @@ document.getElementById("batchReturnBtn").onclick = () => {
 let listSelectedKeys = new Set();
 document.getElementById("listSelectAllBtn").onclick = () => { listRowPayload.forEach((v,k)=>listSelectedKeys.add(k)); renderList(); };
 document.getElementById("listClearSelBtn").onclick = () => { listSelectedKeys.clear(); renderList(); };
+
+// ▼ 変更点：検索欄の文字入力だけでなく、チェックボックスのON/OFFでもリストを更新する
 searchInput.oninput = renderList;
+document.getElementById("filterUnreturned").onchange = renderList;
 
 const modal = document.getElementById("modal");
 let editingIds = [];
@@ -463,7 +469,6 @@ let modalSelectedItemIds = new Set();
 function openNewModal(itemId, dateStr, hourStr = "09:00"){
   const it = findItem(itemId);
   
-  // ▼ 変更点：期限切れの日付をクリックした場合はエラーを出して開かない
   const limitDate = getLimitDate(it.category);
   const selectedDate = fromYmd(dateStr);
   if (selectedDate > limitDate) {
@@ -580,7 +585,6 @@ document.getElementById("modalSave").onclick = () => {
   if(baseItem.category!=="av" && (st>=et)) return msg.textContent = "正しい時間を入力してください";
   if(dayDiffInclusive(start, end) > 7) return msg.textContent = "最大7日までです";
 
-  // ▼ 変更点：保存時にも期限チェックを実行する（手入力で未来の日付を入れさせないため）
   const limitDate = getLimitDate(baseItem.category);
   if(fromYmd(start) > limitDate || fromYmd(end) > limitDate) {
       return msg.textContent = `予約可能期限（${getLimitText(baseItem.category)}）を過ぎています`;
