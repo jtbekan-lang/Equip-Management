@@ -136,8 +136,8 @@
     </div>
 
     <div id="hourlyInputs" style="display:none; gap:10px;">
-      <div style="flex:1;"><label>開始時間 (9:00~21:00)</label><input id="modalStartTime" type="time" min="09:00" max="21:00" step="1800"/></div>
-      <div style="flex:1;"><label>終了時間 (9:00~21:00)</label><input id="modalEndTime" type="time" min="09:00" max="21:00" step="1800"/></div>
+      <div style="flex:1;"><label>開始時間</label><select id="modalStartTime"></select></div>
+      <div style="flex:1;"><label>終了時間</label><select id="modalEndTime"></select></div>
     </div>
 
     <div style="display:flex; gap:10px;">
@@ -177,8 +177,8 @@
         <input id="newItemName" placeholder="名称" style="flex:2;" />
         <input id="newItemCapacity" type="number" min="1" placeholder="総数" style="flex:1;" />
         <select id="newItemCategory" style="flex:1;">
-          <option value="av">備品(日)</option><option value="rearcar">ﾘﾔｶｰ(時)</option>
-          <option value="pipespace">ﾊﾟｲﾌﾟ(時)</option><option value="deskspace">ﾃﾞｽｸ(時)</option>
+          <option value="av">備品</option><option value="rearcar">ﾘﾔｶｰ</option>
+          <option value="pipespace">ﾊﾟｲﾌﾟ</option><option value="deskspace">ﾃﾞｽｸ</option>
         </select>
         <button id="addItemBtn">追加</button>
       </div>
