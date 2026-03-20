@@ -36,7 +36,8 @@ ITEMS_DEFAULT.push(
   { id: 201, name: "旧館1F", type: "hourly", category: "pipespace", capacity: 111 },
   { id: 202, name: "新館1F", type: "hourly", category: "pipespace", capacity: 30 },
   { id: 203, name: "新館2F", type: "hourly", category: "pipespace", capacity: 19 },
-  { id: 301, name: "デスクスペース", type: "hourly", category: "deskspace", capacity: 4 }
+  // ▼ デスクスペースの定員を確実に1に更新
+  { id: 301, name: "デスクスペース", type: "hourly", category: "deskspace", capacity: 1 } 
 );
 
 function pad2(n){ return String(n).padStart(2,"0"); }
@@ -54,7 +55,6 @@ function showToast(msg, type){
   setTimeout(()=>t.classList.remove("show"), 3000);
 }
 
-// 予約可能期限を動的に取得する関数
 function getLimitText(category) {
   const d = new Date();
   if(category === "av" || category === "rearcar") d.setMonth(d.getMonth() + 2, 0); 
@@ -62,7 +62,8 @@ function getLimitText(category) {
   return `${d.getMonth()+1}月${d.getDate()}日`;
 }
 
-const ITEMS_KEY = "equip_items_v5"; 
+// ★ 初期データ（デスクスペース定員等）をブラウザに強制上書きさせるため、キー名をv6に変更
+const ITEMS_KEY = "equip_items_v6"; 
 function loadItems(){
   let arr = [];
   try { arr = JSON.parse(localStorage.getItem(ITEMS_KEY) || "[]"); } catch(e){}
@@ -126,6 +127,7 @@ function renderAll(){
   requestAnimationFrame(ensureDoubleScroll);
 }
 
+// ▼ 変更点：備品（日単位）で複数日またがる予約のセルを結合し、中央に伝票番号・団体名を表示
 function renderDailyGrid(){
   const {year, month} = getSelectedMonth();
   const dim = daysInMonth(year, month);
@@ -145,22 +147,30 @@ function renderDailyGrid(){
     const displayName = `<span style="font-size:10px;">${it.name}</span>`;
     
     tbody += `<tr><td class="daily-sticky">${displayName}</td>`;
+    
+    let skipUntil = 0; 
     for(let d=1; d<=dim; d++){
+      if(d < skipUntil) continue; 
+      
       const dateStr = `${year}-${pad2(month)}-${pad2(d)}`;
       const res = resList.find(r => r.itemId == it.id && r.date === dateStr);
       const dt = new Date(year, month-1, d);
       const bgClass = dt.getDay()===6 ? "bg-sat" : dt.getDay()===0 ? "bg-sun" : "";
       
       if(res){
-        const isStart = (res.startDate === dateStr || d===1);
-        const overdue = (res.status==="loan" && res.endDate < ymd(new Date())) ? "overdue" : "";
-        let cellText = "";
-        if(isStart) {
-          cellText = res.slipNo || "";
-          if(res.quantity > 1) cellText += ` (${res.quantity}個)`;
+        let colspan = 1;
+        // 後続の日も同じ予約かチェックして結合
+        for(let nextD = d+1; nextD <= dim; nextD++) {
+            const nextDateStr = `${year}-${pad2(month)}-${pad2(nextD)}`;
+            const nextRes = resList.find(r => r.itemId == it.id && r.date === nextDateStr && r.startDate === res.startDate && r.endDate === res.endDate && r.group === res.group);
+            if(nextRes) colspan++; else break; 
         }
+        skipUntil = d + colspan;
+
+        const overdue = (res.status==="loan" && res.endDate < ymd(new Date())) ? "overdue" : "";
+        let cellText = [res.slipNo, res.group].filter(Boolean).join("・");
         
-        tbody += `<td class="cell ${bgClass} ${res.status} ${overdue}" onclick="openModal('${res.id}')" title="数量: ${res.quantity||1}\n団体: ${res.group}\n期間: ${res.startDate}~${res.endDate}">${escapeHtml(cellText)}</td>`;
+        tbody += `<td colspan="${colspan}" class="cell ${bgClass} ${res.status} ${overdue}" onclick="openModal('${res.id}')" title="数量: ${res.quantity||1}\n団体: ${res.group}\n期間: ${res.startDate}~${res.endDate}">${escapeHtml(cellText)}</td>`;
       } else {
         tbody += `<td class="cell ${bgClass}" onclick="openNewModal(${it.id}, '${dateStr}')"></td>`;
       }
@@ -176,16 +186,14 @@ function renderHourlyGrid(category){
   const dim = daysInMonth(year, month);
   const items = ITEMS_DATA.filter(i => i.category === category);
   const resList = loadReservations();
-  const isSpace = (category === "pipespace" || category === "deskspace");
   const todayStr = ymd(new Date());
 
-  // 30分刻みの時間枠を生成（9:00 〜 20:30）
   const timeSlots = [];
   for(let h=9; h<=20; h++) {
     timeSlots.push(`${pad2(h)}:00`);
     timeSlots.push(`${pad2(h)}:30`);
   }
-  timeSlots.push("21:00"); // 終点計算用
+  timeSlots.push("21:00"); 
 
   let thead = `<tr><th class="hourly-sticky-date">日付</th><th class="hourly-sticky-item">場所/備品</th>`;
   for(let i=0; i<timeSlots.length-1; i++) {
@@ -204,7 +212,6 @@ function renderHourlyGrid(category){
     const isToday = (dateStr === todayStr);
     
     items.forEach((it, idx) => {
-      // 土日の色は列全体ではなく行全体に適用して色を揃える
       let colorClass = isToday ? "bg-row-today" : isSat ? "bg-sat" : isSun ? "bg-sun" : (idx % 2 === 0 ? "bg-row-a" : "bg-row-b");
 
       const rowIdStr = (isToday && idx === 0) ? `id="today-row"` : "";
@@ -236,7 +243,6 @@ function renderHourlyGrid(category){
           const nowTimeStr = pad2(new Date().getHours())+":"+pad2(new Date().getMinutes());
           const overdue = overlaps.some(r => r.status==="loan" && dateStr <= todayStr && r.endTime <= nowTimeStr) ? "overdue" : "";
 
-          // 後続のセルが同じ予約なら結合する
           for(let j = i+1; j < timeSlots.length-1; j++) {
               const checkHourStr = timeSlots[j];
               const checkNextHourStr = timeSlots[j+1];
@@ -252,16 +258,18 @@ function renderHourlyGrid(category){
           skipUntil = i + colspan; 
 
           let slipText = overlaps.map(r => r.slipNo).filter(Boolean).join(", ");
+          let groupText = overlaps.map(r => r.group).filter(Boolean).join(", ");
           let cellText = "";
-          let unit = (category === "pipespace") ? "脚" : (category === "deskspace" || category === "rearcar") ? "台" : "個";
-
-          if (isSpace || category === "rearcar") {
+          
+          // ▼ 変更点：パイプは数量、それ以外（リヤカー・デスク）は「伝票番号・団体名」を表示
+          if (category === "pipespace") {
              const totalQty = overlaps.reduce((sum, r) => sum + (Number(r.quantity)||1), 0);
-             cellText = slipText ? `${slipText} (${totalQty}${unit}/${it.capacity || 1}${unit})` : `(${totalQty}${unit}/${it.capacity || 1}${unit})`;
+             cellText = slipText ? `${slipText} (${totalQty}脚/${it.capacity || 1}脚)` : `(${totalQty}脚/${it.capacity || 1}脚)`;
           } else {
-             cellText = slipText; 
+             cellText = [slipText, groupText].filter(Boolean).join("・"); 
           }
           
+          let unit = (category === "pipespace") ? "脚" : (category === "deskspace" || category === "rearcar") ? "台" : "個";
           const titles = overlaps.map(r => `団体: ${r.group} (${r.quantity||1}${unit}) ${r.startTime}~${r.endTime}`).join("\n");
           tbody += `<td colspan="${colspan}" class="cell ${status} ${overdue}" onclick="openModal('${baseResId}')" title="${titles}" style="text-align:center;">${escapeHtml(cellText)}</td>`;
         } else {
@@ -554,7 +562,6 @@ document.getElementById("modalSave").onclick = () => {
   if(baseItem.category!=="av" && (st>=et)) return msg.textContent = "正しい時間を入力してください";
   if(dayDiffInclusive(start, end) > 7) return msg.textContent = "最大7日までです";
 
-  // ▼ 変更点：時間外警告の追加
   if(baseItem.category !== "av") {
       if(st < "09:00" || et > "21:00" || (st === "21:00" && et > "21:00")) {
           if(!confirm("時間外の施設利用ですが、本当によろしいでしょうか？")) return;
@@ -711,7 +718,6 @@ function countDueToday(){
 }
 
 (function init(){
-  // ▼ 変更点：30分刻みの時間オプションを生成
   const timeSelects = [document.getElementById("modalStartTime"), document.getElementById("modalEndTime")];
   let timeOptionsHTML = "";
   for(let h=0; h<=23; h++){
