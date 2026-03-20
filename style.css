@@ -53,7 +53,6 @@ button.danger{ background: linear-gradient(135deg, rgba(225,29,72,.10), rgba(225
 .tableWrap{ overflow-x:auto; border-radius:14px; border:1px solid var(--border); background:#fff; box-shadow: var(--shadow2); max-height: calc(100vh - 360px); }
 @media (max-width:520px){ .tableWrap{max-height: calc(100vh - 380px);} }
 
-/* ▼ 変更点：表全体を黒枠(格子)にする */
 table{ 
   border-collapse:separate; border-spacing:0; table-layout:fixed; width:100%; 
   background:#fff; font-size:11.5px; color:#0f172a; 
@@ -68,7 +67,6 @@ th,td{
 thead th{ position:sticky; top:0; z-index:10; background:#f1f5f9; font-weight:700; border-bottom: 1px solid #000; }
 thead tr:nth-child(2) th{ top:30px; font-weight:650; color:#475569; background:#f8fafc; }
 
-/* ▼ 変更点：予約の色が最前面に出るよう !important を付与 */
 td.cell{cursor:pointer;position:relative; font-size:11.5px; transition: filter 0.1s;}
 td.cell.reserved{background:var(--reservedBg) !important;} 
 td.cell.loan{background:var(--loanBg) !important;} 
@@ -76,7 +74,6 @@ td.cell.returned{background:var(--returnedBg) !important;}
 td.cell:hover{ filter: brightness(0.92); z-index: 1; }
 td.cell.overdue{ outline:2px solid var(--overdue); outline-offset:-2px; }
 
-/* 固定列の境界線も黒にする */
 .daily-sticky { width:160px; min-width:160px; max-width:160px; position:sticky; left:0; z-index:5; background:#fff; border-right:1px solid #000; text-align:left; }
 thead .daily-sticky { z-index:15; background:#f1f5f9; text-align:center; }
 
@@ -88,7 +85,6 @@ thead .hourly-sticky-date, thead .hourly-sticky-item { z-index:15; background:#f
 .bg-row-b { background-color: #f8fafc; }
 .bg-row-today { background-color: #fffbeb; } 
 
-/* 土日の色（!importantを外して、予約色が上書きできるようにする） */
 .bg-sat { background-color: #dbeafe; }
 .text-sat { color: #1e40af; font-weight:800; }
 .bg-sun { background-color: #fee2e2; }
@@ -97,7 +93,6 @@ thead .hourly-sticky-date, thead .hourly-sticky-item { z-index:15; background:#f
 .topScroll{ overflow-x:auto; overflow-y:hidden; height:14px; border:1px solid var(--border); border-radius:12px; background:#fff; box-shadow: var(--shadow2); }
 #topScrollInner{height:1px;}
 
-/* 予約一覧タブ側の表は元の線を維持 */
 .listTable{ width:100%; border:1px solid var(--border); border-radius:14px; overflow:hidden; background:#fff; box-shadow: var(--shadow2); }
 .listTable table{width:100%;min-width:960px;background:#fff; table-layout:auto; border:none;}
 .listTable th, .listTable td { border-bottom:1px solid var(--border); border-right:1px solid var(--border); }
