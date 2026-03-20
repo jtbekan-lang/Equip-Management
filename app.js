@@ -1,89 +1,43 @@
 /* =========================================================
    1) 備品データ＆ユーティリティ
 ========================================================= */
-const ITEMS_DEFAULT = [
-  // AV (70 items)
-  { id: 1, name: "ワイヤレスセット / A", type: "daily", category: "av", capacity: 1 },
-  { id: 2, name: "ワイヤレスセット / B(便利コード）", type: "daily", category: "av", capacity: 1 },
-  { id: 3, name: "ワイヤレスセット / C", type: "daily", category: "av", capacity: 1 },
-  { id: 4, name: "マイクスタンド / A ワイヤレス用", type: "daily", category: "av", capacity: 1 },
-  { id: 5, name: "マイクスタンド / B ワイヤレス用", type: "daily", category: "av", capacity: 1 },
-  { id: 6, name: "マイクスタンド / C ワイヤレス用", type: "daily", category: "av", capacity: 1 },
-  { id: 7, name: "マイクスタンド / D 有線用", type: "daily", category: "av", capacity: 1 },
-  { id: 8, name: "卓上マイクスタンド / ﾜｲﾔﾚｽ用", type: "daily", category: "av", capacity: 1 },
-  { id: 9, name: "卓上マイクスタンド / 有線A・B用", type: "daily", category: "av", capacity: 1 },
-  { id: 10, name: "卓上マイクスタンド / 有線C・D用", type: "daily", category: "av", capacity: 1 },
-  { id: 11, name: "有線マイク / A", type: "daily", category: "av", capacity: 1 },
-  { id: 12, name: "有線マイク / B", type: "daily", category: "av", capacity: 1 },
-  { id: 13, name: "有線マイク / C", type: "daily", category: "av", capacity: 1 },
-  { id: 14, name: "有線マイク / D", type: "daily", category: "av", capacity: 1 },
-  { id: 15, name: "ﾏｲｸｹｰﾌﾞﾙ / A", type: "daily", category: "av", capacity: 1 },
-  { id: 16, name: "ﾏｲｸｹｰﾌﾞﾙ / B", type: "daily", category: "av", capacity: 1 },
-  { id: 17, name: "ﾏｲｸｹｰﾌﾞﾙ / C", type: "daily", category: "av", capacity: 1 },
-  { id: 18, name: "ﾏｲｸｹｰﾌﾞﾙ / D", type: "daily", category: "av", capacity: 1 },
-  { id: 19, name: "ﾏｲｸｹｰﾌﾞﾙ / E", type: "daily", category: "av", capacity: 1 },
-  { id: 20, name: "ﾏｲｸｹｰﾌﾞﾙ / F", type: "daily", category: "av", capacity: 1 },
-  { id: 21, name: "ﾏｲｸｹｰﾌﾞﾙ / G", type: "daily", category: "av", capacity: 1 },
-  { id: 22, name: "ﾏｲｸｹｰﾌﾞﾙ / H", type: "daily", category: "av", capacity: 1 },
-  { id: 23, name: "ﾏｲｸｹｰﾌﾞﾙ / I", type: "daily", category: "av", capacity: 1 },
-  { id: 24, name: "ﾏｲｸｹｰﾌﾞﾙ / J", type: "daily", category: "av", capacity: 1 },
-  { id: 25, name: "ﾏｲｸｹｰﾌﾞﾙ / K", type: "daily", category: "av", capacity: 1 },
-  { id: 26, name: "ﾏｲｸｹｰﾌﾞﾙ / L", type: "daily", category: "av", capacity: 1 },
-  { id: 27, name: "マイク用変換コネクタ / A", type: "daily", category: "av", capacity: 1 },
-  { id: 28, name: "マイク用変換コネクタ / B", type: "daily", category: "av", capacity: 1 },
-  { id: 29, name: "マイク用変換コネクタ / C", type: "daily", category: "av", capacity: 1 },
-  { id: 30, name: "マイク用変換コネクタ / D", type: "daily", category: "av", capacity: 1 },
-  { id: 31, name: "延長コード / A", type: "daily", category: "av", capacity: 1 },
-  { id: 32, name: "延長コード / B", type: "daily", category: "av", capacity: 1 },
-  { id: 33, name: "延長コード / C", type: "daily", category: "av", capacity: 1 },
-  { id: 34, name: "延長コード / D", type: "daily", category: "av", capacity: 1 },
-  { id: 35, name: "延長コード / E", type: "daily", category: "av", capacity: 1 },
-  { id: 36, name: "延長コード / F", type: "daily", category: "av", capacity: 1 },
-  { id: 37, name: "延長コード / G", type: "daily", category: "av", capacity: 1 },
-  { id: 38, name: "延長コード / H (予備)", type: "daily", category: "av", capacity: 1 }, 
-  { id: 39, name: "2股プラグ / A", type: "daily", category: "av", capacity: 1 },
-  { id: 40, name: "2股プラグ / B", type: "daily", category: "av", capacity: 1 },
-  { id: 41, name: "2股プラグ / C", type: "daily", category: "av", capacity: 1 },
-  { id: 42, name: "2股プラグ / D", type: "daily", category: "av", capacity: 1 },
-  { id: 43, name: "電源タップ / A", type: "daily", category: "av", capacity: 1 },
-  { id: 44, name: "電源タップ / B", type: "daily", category: "av", capacity: 1 },
-  { id: 45, name: "電源タップ / C", type: "daily", category: "av", capacity: 1 },
-  { id: 46, name: "電源タップ / D", type: "daily", category: "av", capacity: 1 },
-  { id: 47, name: "電源タップ / E", type: "daily", category: "av", capacity: 1 },
-  { id: 48, name: "電源タップ / F", type: "daily", category: "av", capacity: 1 },
-  { id: 49, name: "電源タップ / G", type: "daily", category: "av", capacity: 1 },
-  { id: 50, name: "電源タップ / H", type: "daily", category: "av", capacity: 1 },
-  { id: 51, name: "電源タップ / I", type: "daily", category: "av", capacity: 1 },
-  { id: 52, name: "電源タップ / J", type: "daily", category: "av", capacity: 1 },
-  { id: 53, name: "電源タップ / K", type: "daily", category: "av", capacity: 1 },
-  { id: 54, name: "電源タップ / L", type: "daily", category: "av", capacity: 1 },
-  { id: 55, name: "電源タップ / M", type: "daily", category: "av", capacity: 1 },
-  { id: 56, name: "スピーカー / A", type: "daily", category: "av", capacity: 1 },
-  { id: 57, name: "スピーカー / B", type: "daily", category: "av", capacity: 1 },
-  { id: 58, name: "スピーカー / C", type: "daily", category: "av", capacity: 1 },
-  { id: 59, name: "スピーカー / D", type: "daily", category: "av", capacity: 1 },
-  { id: 60, name: "スピーカー / E", type: "daily", category: "av", capacity: 1 },
-  { id: 61, name: "スピーカー / F", type: "daily", category: "av", capacity: 1 },
-  { id: 62, name: "スピーカー / G", type: "daily", category: "av", capacity: 1 },
-  { id: 63, name: "スピーカー / H", type: "daily", category: "av", capacity: 1 },
-  { id: 64, name: "スピーカースタンド / A", type: "daily", category: "av", capacity: 1 },
-  { id: 65, name: "スピーカースタンド / B", type: "daily", category: "av", capacity: 1 },
-  { id: 66, name: "スピーカースタンド / C", type: "daily", category: "av", capacity: 1 },
-  { id: 67, name: "スピーカースタンド / D (予備)", type: "daily", category: "av", capacity: 1 }, 
-  { id: 68, name: "ポータブルスピーカー", type: "daily", category: "av", capacity: 1 },
-  { id: 69, name: "床保護マット / A", type: "daily", category: "av", capacity: 1 },
-  { id: 70, name: "床保護マット / B", type: "daily", category: "av", capacity: 1 },
-  
-  // Rearcar
+const avNames = [
+  "ワイヤレスセットA（マイク1･2）", "ワイヤレスセットB（マイク1･2）", "ワイヤレスセットC（マイク1･2）",
+  "マイクスタンドA（ワイヤレス用）", "マイクスタンドB（ワイヤレス用）", "マイクスタンドC（ワイヤレス用）",
+  "マイクスタンドD（有線用）", "卓上マイクスタンド（ワイヤレス用）", "卓上マイクスタンド（有線A・B用）",
+  "卓上マイクスタンド（有線C・D用）", "有線マイクA", "有線マイクB", "有線マイクC", "有線マイクD",
+  "有線マイクE", "/", "拡声器A", "拡声器B", "拡声器C", "マイク延長コードA",
+  "マイク延長コードB", "ワイヤレスセット用便利コードA", "ワイヤレスセット用便利コードB",
+  "CD・MDデッキ", "CD・SD・USBデッキ", "CDデッキ", "液晶プロジェクターA（Type-C,HDMI,VGA対応）",
+  "液晶プロジェクターB（Type-C,HDMI,VGA対応）", "液晶プロジェクターC（HDMI,VGA対応）",
+  "デジタルビデオカメラ小（SDカード）", "デジタルビデオカメラ小（DVテープ）", "デジタルビデオカメラ大（DVテープ）",
+  "デジタルビデオカメラ小（SDタイプSD付属なし）", "デジタルカメラ", "三脚", "スクリーン",
+  "延長コードリールA（30ｍ）", "延長コードリールB（30ｍ）", "延長コードリールC（30ｍ）",
+  "延長コードリールD（30ｍ）", "延長コードリールE（30ｍ）", "延長コードリールF（30ｍ）",
+  "延長コード（3ｍ）", "延長コード（5ｍ）", "延長コード（10ｍ）", "巻尺（30ｍ）", "巻尺（50ｍ）",
+  "ブル-シートA（5ｍ×3.2ｍ）", "ブル-シートB（5ｍ×3.2ｍ）", "ブル-シートC（4ｍ×3.2ｍ）",
+  "暗幕A（194×251ｃｍ）", "暗幕B（186×245ｃｍ）", "暗幕C（186×245ｃｍ）", "暗幕D（234×320ｃｍ）",
+  "暗幕E（予備・穴あり）", "テーブルカバーA（180×68ｃｍ,45cm/60cm机用）", "テーブルカバーB（180×68ｃｍ,45cm/60cm机用）",
+  "テーブルカバーC（180×68ｃｍ,45cm/60cm机用）", "テーブルカバーD（180×68ｃｍ,45cm/60cm机用）",
+  "テーブルカバーE（180×68ｃｍ,45cm/60cm机用）", "指示棒", "レーザーポインター",
+  "ほうきちりとりセットA", "ほうきちりとりセットB", "掃除機A", "掃除機B",
+  "多機能スピーカー（大）", "ポータブルスピーカー", "床保護マットA", "床保護マットB"
+];
+
+const ITEMS_DEFAULT = [];
+avNames.forEach((name, index) => {
+    let id = index + 1;
+    let paddedId = String(id).padStart(2, '0');
+    ITEMS_DEFAULT.push({ id: id, name: `#${paddedId} ${name}`, type: "daily", category: "av", capacity: 1 });
+});
+ITEMS_DEFAULT.push(
   { id: 101, name: "2号車", type: "hourly", category: "rearcar", capacity: 1 },
   { id: 102, name: "3号車", type: "hourly", category: "rearcar", capacity: 1 },
-  
-  // Spaces
   { id: 201, name: "旧館1F", type: "hourly", category: "pipespace", capacity: 111 },
   { id: 202, name: "新館1F", type: "hourly", category: "pipespace", capacity: 30 },
   { id: 203, name: "新館2F", type: "hourly", category: "pipespace", capacity: 19 },
   { id: 301, name: "デスクスペース", type: "hourly", category: "deskspace", capacity: 4 }
-];
+);
 
 function pad2(n){ return String(n).padStart(2,"0"); }
 function ymd(date){ return `${date.getFullYear()}-${pad2(date.getMonth()+1)}-${pad2(date.getDate())}`; }
@@ -100,7 +54,14 @@ function showToast(msg, type){
   setTimeout(()=>t.classList.remove("show"), 3000);
 }
 
-const ITEMS_KEY = "equip_items_v4";
+function getLimitText(category) {
+  const d = new Date();
+  if(category === "av" || category === "rearcar") d.setMonth(d.getMonth() + 2, 0); // 1ヶ月先の月末
+  else d.setMonth(d.getMonth() + 4, 0); // 3ヶ月先の月末
+  return `${d.getMonth()+1}月${d.getDate()}日`;
+}
+
+const ITEMS_KEY = "equip_items_v5"; // IDマッピングが変わったのでクリアのためキー変更
 function loadItems(){
   let arr = [];
   try { arr = JSON.parse(localStorage.getItem(ITEMS_KEY) || "[]"); } catch(e){}
@@ -138,10 +99,23 @@ function renderAll(){
   const cat = currentCategory;
   const isAv = (cat === "av");
   
+  // 予約可能期限とタブ名の動的変更
   const limitPill = document.getElementById("limitPill");
-  if(isAv) limitPill.textContent = "予約可能：翌月末まで(1日単位)";
-  else if(cat==="rearcar") limitPill.textContent = "予約可能：1ヶ月先月末まで(時間)";
-  else limitPill.textContent = "予約可能：3ヶ月先月末まで(時間)";
+  const tabBtn = document.getElementById("tabListBtn");
+  
+  if(cat === "av") {
+      limitPill.textContent = `予約可能：${getLimitText(cat)} まで`;
+      tabBtn.textContent = "貸出中備品一覧";
+  } else if(cat === "rearcar") {
+      limitPill.textContent = `予約可能：${getLimitText(cat)} まで`;
+      tabBtn.textContent = "貸出中台数一覧";
+  } else if(cat === "pipespace") {
+      limitPill.textContent = `予約可能：${getLimitText(cat)} まで`;
+      tabBtn.textContent = "貸出中脚数一覧";
+  } else {
+      limitPill.textContent = `予約可能：${getLimitText(cat)} まで`;
+      tabBtn.textContent = "貸出中台数一覧";
+  }
 
   document.getElementById("gridTitle").textContent = isAv ? "日 × 備品" : "日付 × 備品(場所)";
 
@@ -161,19 +135,22 @@ function renderDailyGrid(){
   let thead = `<tr><th class="daily-sticky">備品</th>`;
   for(let d=1; d<=dim; d++){
     const dt = new Date(year, month-1, d);
-    thead += `<th>${d}<br><span style="font-size:10px">${weekdayJa(dt)}</span></th>`;
+    let dayClass = dt.getDay()===6 ? "text-sat bg-sat" : dt.getDay()===0 ? "text-sun bg-sun" : "";
+    thead += `<th class="${dayClass}">${d}<br><span style="font-size:10px">${weekdayJa(dt)}</span></th>`;
   }
   thead += `</tr>`;
 
   let tbody = "";
   items.forEach((it, idx) => {
-    const displayNum = pad2(idx + 1);
-    const displayName = `<span style="font-size:11px; color:var(--muted); margin-right:6px; font-weight:bold;">${displayNum}.</span>${it.name}`;
+    // 備品リストが長いため、11pxから10pxに変更して調整
+    const displayName = `<span style="font-size:10px;">${it.name}</span>`;
     
     tbody += `<tr><td class="daily-sticky">${displayName}</td>`;
     for(let d=1; d<=dim; d++){
       const dateStr = `${year}-${pad2(month)}-${pad2(d)}`;
       const res = resList.find(r => r.itemId == it.id && r.date === dateStr);
+      const dt = new Date(year, month-1, d);
+      const bgClass = dt.getDay()===6 ? "bg-sat" : dt.getDay()===0 ? "bg-sun" : "";
       
       if(res){
         const isStart = (res.startDate === dateStr || d===1);
@@ -184,9 +161,9 @@ function renderDailyGrid(){
           if(res.quantity > 1) cellText += ` (${res.quantity}個)`;
         }
         
-        tbody += `<td class="cell ${res.status} ${overdue}" onclick="openModal('${res.id}')" title="数量: ${res.quantity||1}\n団体: ${res.group}\n期間: ${res.startDate}~${res.endDate}">${escapeHtml(cellText)}</td>`;
+        tbody += `<td class="cell ${bgClass} ${res.status} ${overdue}" onclick="openModal('${res.id}')" title="数量: ${res.quantity||1}\n団体: ${res.group}\n期間: ${res.startDate}~${res.endDate}">${escapeHtml(cellText)}</td>`;
       } else {
-        tbody += `<td class="cell" onclick="openNewModal(${it.id}, '${dateStr}')"></td>`;
+        tbody += `<td class="cell ${bgClass}" onclick="openNewModal(${it.id}, '${dateStr}')"></td>`;
       }
     }
     tbody += `</tr>`;
@@ -195,6 +172,7 @@ function renderDailyGrid(){
   grid.innerHTML = `<thead>${thead}</thead><tbody>${tbody}</tbody>`;
 }
 
+// 時間単位グリッド（30分刻み化）
 function renderHourlyGrid(category){
   const {year, month} = getSelectedMonth();
   const dim = daysInMonth(year, month);
@@ -203,9 +181,17 @@ function renderHourlyGrid(category){
   const isSpace = (category === "pipespace" || category === "deskspace");
   const todayStr = ymd(new Date());
 
+  // 30分ごとの時間枠を作成（9:00〜20:30 の 24枠）
+  const timeSlots = [];
+  for(let h=9; h<=20; h++) {
+    timeSlots.push(`${pad2(h)}:00`);
+    timeSlots.push(`${pad2(h)}:30`);
+  }
+  timeSlots.push("21:00"); // 最後の終点用
+
   let thead = `<tr><th class="hourly-sticky-date">日付</th><th class="hourly-sticky-item">場所/備品</th>`;
-  for(let h=9; h<=21; h++) {
-    thead += `<th>${h}:00</th>`; 
+  for(let i=0; i<timeSlots.length-1; i++) {
+    thead += `<th>${timeSlots[i]}</th>`; 
   }
   thead += `</tr>`;
 
@@ -215,27 +201,31 @@ function renderHourlyGrid(category){
   for(let d=1; d<=dim; d++){
     const dateStr = `${year}-${pad2(month)}-${pad2(d)}`;
     const dt = new Date(year, month-1, d);
+    const isSat = dt.getDay() === 6;
+    const isSun = dt.getDay() === 0;
     const isToday = (dateStr === todayStr);
     
     items.forEach((it, idx) => {
-      let colorClass = isToday ? "bg-row-today" : (idx % 2 === 0 ? "bg-row-a" : "bg-row-b");
+      // 土日の行に色を付ける
+      let colorClass = isToday ? "bg-row-today" : isSat ? "bg-sat" : isSun ? "bg-sun" : (idx % 2 === 0 ? "bg-row-a" : "bg-row-b");
 
       const rowIdStr = (isToday && idx === 0) ? `id="today-row"` : "";
       tbody += `<tr class="${colorClass}" ${rowIdStr}>`;
       
       if(idx === 0) {
         if(isToday) hasToday = true;
-        tbody += `<td class="hourly-sticky-date" rowspan="${items.length}">${d} ${weekdayJa(dt)}</td>`;
+        let dayTxtClass = isSat ? "text-sat" : isSun ? "text-sun" : "";
+        tbody += `<td class="hourly-sticky-date ${dayTxtClass}" rowspan="${items.length}">${d} ${weekdayJa(dt)}</td>`;
       }
       tbody += `<td class="hourly-sticky-item">${it.name}</td>`;
 
       let skipUntil = 0; 
 
-      for(let h=9; h<=21; h++){
-        if (h < skipUntil) continue; 
+      for(let i=0; i<timeSlots.length-1; i++){
+        if (i < skipUntil) continue; 
 
-        const hourStr = `${pad2(h)}:00`;
-        const nextHourStr = `${pad2(h+1)}:00`;
+        const hourStr = timeSlots[i];
+        const nextHourStr = timeSlots[i+1];
         
         const overlaps = resList.filter(r => r.itemId == it.id && r.date === dateStr && (r.startTime < nextHourStr && r.endTime > hourStr));
 
@@ -244,11 +234,14 @@ function renderHourlyGrid(category){
           const baseResId = overlaps[0].id; 
           const statuses = overlaps.map(r=>r.status);
           const status = statuses.includes("loan") ? "loan" : statuses.includes("reserved") ? "reserved" : "returned";
-          const overdue = overlaps.some(r => r.status==="loan" && dateStr <= todayStr && r.endTime < pad2(new Date().getHours())+":00") ? "overdue" : "";
+          // 期限超過チェック
+          const nowTimeStr = pad2(new Date().getHours())+":"+pad2(new Date().getMinutes());
+          const overdue = overlaps.some(r => r.status==="loan" && dateStr <= todayStr && r.endTime <= nowTimeStr) ? "overdue" : "";
 
-          for(let nextH = h+1; nextH <= 21; nextH++) {
-              const checkHourStr = `${pad2(nextH)}:00`;
-              const checkNextHourStr = `${pad2(nextH+1)}:00`;
+          // セルをどこまで結合するか判定
+          for(let j = i+1; j < timeSlots.length-1; j++) {
+              const checkHourStr = timeSlots[j];
+              const checkNextHourStr = timeSlots[j+1];
               const nextOverlaps = resList.filter(r => r.itemId == it.id && r.date === dateStr && (r.startTime < checkNextHourStr && r.endTime > checkHourStr));
               
               if(nextOverlaps.some(r => r.id === baseResId)) {
@@ -258,7 +251,7 @@ function renderHourlyGrid(category){
               }
           }
 
-          skipUntil = h + colspan; 
+          skipUntil = i + colspan; 
 
           let slipText = overlaps.map(r => r.slipNo).filter(Boolean).join(", ");
           let cellText = "";
@@ -266,7 +259,6 @@ function renderHourlyGrid(category){
 
           if (isSpace || category === "rearcar") {
              const totalQty = overlaps.reduce((sum, r) => sum + (Number(r.quantity)||1), 0);
-             // HTMLタグを削除し、文字の「脚」「台」のみをつなげる
              cellText = slipText ? `${slipText} (${totalQty}${unit}/${it.capacity || 1}${unit})` : `(${totalQty}${unit}/${it.capacity || 1}${unit})`;
           } else {
              cellText = slipText; 
@@ -321,7 +313,7 @@ function renderStats(cat){
     `;
   } else {
     const today = ymd(new Date());
-    const nowHour = pad2(new Date().getHours()) + ":00";
+    const nowHour = pad2(new Date().getHours()) + ":" + pad2(new Date().getMinutes());
     const unit = (cat === "pipespace") ? "脚" : (cat === "deskspace" || cat === "rearcar") ? "台" : "個";
 
     items.forEach(it => {
@@ -456,17 +448,24 @@ let modalSelectedItemIds = new Set();
 function openNewModal(itemId, dateStr, hourStr = "09:00"){
   editingIds = [];
   document.getElementById("modalMsg").textContent = "";
-  populateModalSelects();
   
   const it = findItem(itemId);
   document.getElementById("modalTitle").textContent = `${dateStr} の新規予約`;
-  document.getElementById("modalItem").value = itemId;
+  document.getElementById("modalItem").value = itemId; // 隠しフィールドにセット
+  document.getElementById("modalItemNameDisplay").textContent = it.name; // 表示用にセット
+  
   document.getElementById("modalStart").value = dateStr;
   document.getElementById("modalEnd").value = dateStr;
   document.getElementById("modalStartTime").value = hourStr;
-  document.getElementById("modalEndTime").value = pad2(parseInt(hourStr)+1)+":00";
+  
+  // 初期終了時間を30分後にセット
+  let [hh, mm] = hourStr.split(":").map(Number);
+  mm += 30; if(mm>=60){ hh++; mm-=60; }
+  document.getElementById("modalEndTime").value = `${pad2(hh)}:${pad2(mm)}`;
+  
   document.getElementById("modalGroup").value = "";
   document.getElementById("modalQuantity").value = "1";
+  document.getElementById("modalQuantity").max = it.capacity || 1; // 上限をセット
   document.getElementById("modalSlip").value = "";
   document.getElementById("modalStatus").value = "reserved";
   
@@ -485,17 +484,19 @@ function openModal(id){
   editingIds = loadReservations().filter(r => r.itemId==res.itemId && r.startDate==res.startDate && r.endDate==res.endDate && r.group==res.group).map(r=>r.id);
   
   document.getElementById("modalMsg").textContent = "";
-  populateModalSelects();
   
   const it = findItem(res.itemId);
   document.getElementById("modalTitle").textContent = `予約編集`;
   document.getElementById("modalItem").value = res.itemId;
+  document.getElementById("modalItemNameDisplay").textContent = it.name;
+  
   document.getElementById("modalStart").value = res.startDate;
   document.getElementById("modalEnd").value = res.endDate;
   document.getElementById("modalStartTime").value = res.startTime;
   document.getElementById("modalEndTime").value = res.endTime;
   document.getElementById("modalGroup").value = res.group;
   document.getElementById("modalQuantity").value = res.quantity || 1;
+  document.getElementById("modalQuantity").max = it.capacity || 1; // 上限をセット
   document.getElementById("modalSlip").value = res.slipNo;
   document.getElementById("modalStatus").value = res.status;
   
@@ -510,16 +511,16 @@ function toggleModalInputs(cat){
   const isAv = (cat === "av");
   document.getElementById("dailyInputs").style.display = isAv ? "block" : "none";
   document.getElementById("hourlyInputs").style.display = isAv ? "none" : "flex";
-  document.getElementById("multiContainer").style.display = "block";
+  // 複数予約は備品（av）の時だけ表示
+  document.getElementById("multiContainer").style.display = isAv ? "block" : "none";
 
-  let unit = (cat === "pipespace") ? "脚" : (cat === "deskspace" || cat === "rearcar") ? "台" : "個";
-  document.getElementById("modalUnit").textContent = unit;
-}
-
-function populateModalSelects(){
-  const sel = document.getElementById("modalItem");
-  sel.innerHTML = "";
-  ITEMS_DATA.forEach(it => { sel.innerHTML += `<option value="${it.id}">${it.name}</option>`; });
+  // パイプスペース以外は数量を非表示にする
+  if(cat === "pipespace") {
+      document.getElementById("quantityContainer").style.display = "block";
+      document.getElementById("modalUnit").textContent = "脚";
+  } else {
+      document.getElementById("quantityContainer").style.display = "none";
+  }
 }
 
 document.getElementById("modalMulti").onchange = (e) => {
@@ -541,7 +542,6 @@ function renderMultiList(){
 document.getElementById("multiSearch").oninput = renderMultiList;
 document.getElementById("multiAllBtn").onclick = () => { ITEMS_DATA.filter(i=>i.category===findItem(document.getElementById("modalItem").value).category).forEach(i=>modalSelectedItemIds.add(i.id)); renderMultiList(); };
 document.getElementById("multiClearBtn").onclick = () => { modalSelectedItemIds.clear(); modalSelectedItemIds.add(Number(document.getElementById("modalItem").value)); renderMultiList(); };
-document.getElementById("modalItem").onchange = (e) => { toggleModalInputs(findItem(e.target.value).category); modalSelectedItemIds.add(Number(e.target.value)); renderMultiList(); };
 
 document.getElementById("modalSave").onclick = () => {
   const msg = document.getElementById("modalMsg");
@@ -551,13 +551,21 @@ document.getElementById("modalSave").onclick = () => {
   const st = baseItem.category==="av" ? "09:00" : document.getElementById("modalStartTime").value;
   const et = baseItem.category==="av" ? "21:00" : document.getElementById("modalEndTime").value;
   const group = document.getElementById("modalGroup").value.trim();
-  const quantity = parseInt(document.getElementById("modalQuantity").value) || 1;
   const slipNo = document.getElementById("modalSlip").value.trim();
   const status = document.getElementById("modalStatus").value;
   
+  // バリデーション追加
   if(!group) return msg.textContent = "団体名を入れてください";
+  if(!slipNo) return msg.textContent = "伝票番号を入れてください"; // 伝票番号を必須化
   if(baseItem.category!=="av" && (st>=et)) return msg.textContent = "正しい時間を入力してください";
   if(dayDiffInclusive(start, end) > 7) return msg.textContent = "最大7日までです";
+
+  // パイプスペース以外は数量を強制的に1として保存
+  let quantity = 1;
+  if(baseItem.category === "pipespace") {
+      quantity = parseInt(document.getElementById("modalQuantity").value) || 1;
+      if (quantity > baseItem.capacity) return msg.textContent = `数量は最大 ${baseItem.capacity} 脚までです`;
+  }
 
   let list = loadReservations();
   if(editingIds.length) list = list.filter(r => !editingIds.includes(r.id));
@@ -589,7 +597,7 @@ document.getElementById("modalSave").onclick = () => {
       if (maxConcurrent + quantity > cap) {
           conflict = true;
           if (cap === 1) conflictMsg = "すでに他の予約がその時間帯に入っています。";
-          else conflictMsg = `その時間帯は空きが足りません（残り ${cap - maxConcurrent} 個/脚）。`;
+          else conflictMsg = `その時間帯は空きが足りません（残り ${cap - maxConcurrent} 脚）。`;
       }
       cur.setDate(cur.getDate()+1);
     }
