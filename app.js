@@ -36,7 +36,6 @@ ITEMS_DEFAULT.push(
   { id: 201, name: "旧館1F", type: "hourly", category: "pipespace", capacity: 111 },
   { id: 202, name: "新館1F", type: "hourly", category: "pipespace", capacity: 30 },
   { id: 203, name: "新館2F", type: "hourly", category: "pipespace", capacity: 19 },
-  // ▼ デスクスペースの定員を確実に1に更新
   { id: 301, name: "デスクスペース", type: "hourly", category: "deskspace", capacity: 1 } 
 );
 
@@ -55,14 +54,20 @@ function showToast(msg, type){
   setTimeout(()=>t.classList.remove("show"), 3000);
 }
 
-function getLimitText(category) {
+// ▼ 変更点：期限を正確な「日付（Date）」で取得する関数を追加
+function getLimitDate(category) {
   const d = new Date();
   if(category === "av" || category === "rearcar") d.setMonth(d.getMonth() + 2, 0); 
   else d.setMonth(d.getMonth() + 4, 0); 
+  return d;
+}
+
+// 期限を「テキスト」で取得する関数
+function getLimitText(category) {
+  const d = getLimitDate(category);
   return `${d.getMonth()+1}月${d.getDate()}日`;
 }
 
-// ★ 初期データ（デスクスペース定員等）をブラウザに強制上書きさせるため、キー名をv6に変更
 const ITEMS_KEY = "equip_items_v6"; 
 function loadItems(){
   let arr = [];
@@ -127,7 +132,6 @@ function renderAll(){
   requestAnimationFrame(ensureDoubleScroll);
 }
 
-// ▼ 変更点：備品（日単位）で複数日またがる予約のセルを結合し、中央に伝票番号・団体名を表示
 function renderDailyGrid(){
   const {year, month} = getSelectedMonth();
   const dim = daysInMonth(year, month);
@@ -159,7 +163,6 @@ function renderDailyGrid(){
       
       if(res){
         let colspan = 1;
-        // 後続の日も同じ予約かチェックして結合
         for(let nextD = d+1; nextD <= dim; nextD++) {
             const nextDateStr = `${year}-${pad2(month)}-${pad2(nextD)}`;
             const nextRes = resList.find(r => r.itemId == it.id && r.date === nextDateStr && r.startDate === res.startDate && r.endDate === res.endDate && r.group === res.group);
@@ -261,7 +264,6 @@ function renderHourlyGrid(category){
           let groupText = overlaps.map(r => r.group).filter(Boolean).join(", ");
           let cellText = "";
           
-          // ▼ 変更点：パイプは数量、それ以外（リヤカー・デスク）は「伝票番号・団体名」を表示
           if (category === "pipespace") {
              const totalQty = overlaps.reduce((sum, r) => sum + (Number(r.quantity)||1), 0);
              cellText = slipText ? `${slipText} (${totalQty}脚/${it.capacity || 1}脚)` : `(${totalQty}脚/${it.capacity || 1}脚)`;
@@ -292,6 +294,7 @@ function renderHourlyGrid(category){
   }
 }
 
+// ▼ 変更点：本日の貸出の集計方法を「件数・日数」から「ユニークな備品の個数」に修正
 function renderStats(cat){
   const items = ITEMS_DATA.filter(i => i.category === cat);
   const statsGrid = document.getElementById("statsGrid");
@@ -299,15 +302,21 @@ function renderStats(cat){
 
   if(cat === "av") {
     let total = items.length;
-    let used = 0, loan = 0;
     const today = ymd(new Date());
+    
+    const usedItems = new Set();
+    const loanItems = new Set();
+
     loadReservations().forEach(r => {
-      if(!items.find(i=>i.id == r.itemId)) return;
-      if(r.date === today || (r.startDate <= today && today <= r.endDate)){
-        used++;
-        if(r.status==="loan") loan++;
+      // 本日の予約データかつ、avカテゴリの備品である場合のみ
+      if(r.date === today && items.some(i => i.id == r.itemId)){
+        usedItems.add(r.itemId);
+        if(r.status === "loan") loanItems.add(r.itemId);
       }
     });
+
+    let used = usedItems.size;
+    let loan = loanItems.size;
     const avail = Math.max(0, total - used);
     const { overdue: od } = countDueToday();
 
@@ -452,10 +461,19 @@ let editingIds = [];
 let modalSelectedItemIds = new Set();
 
 function openNewModal(itemId, dateStr, hourStr = "09:00"){
+  const it = findItem(itemId);
+  
+  // ▼ 変更点：期限切れの日付をクリックした場合はエラーを出して開かない
+  const limitDate = getLimitDate(it.category);
+  const selectedDate = fromYmd(dateStr);
+  if (selectedDate > limitDate) {
+      showToast(`予約可能期限（${getLimitText(it.category)}）を過ぎているため予約できません`, "error");
+      return;
+  }
+
   editingIds = [];
   document.getElementById("modalMsg").textContent = "";
   
-  const it = findItem(itemId);
   document.getElementById("modalTitle").textContent = `${dateStr} の新規予約`;
   document.getElementById("modalItem").value = itemId; 
   document.getElementById("modalItemNameDisplay").textContent = it.name; 
@@ -561,6 +579,12 @@ document.getElementById("modalSave").onclick = () => {
   if(!slipNo) return msg.textContent = "伝票番号を入れてください";
   if(baseItem.category!=="av" && (st>=et)) return msg.textContent = "正しい時間を入力してください";
   if(dayDiffInclusive(start, end) > 7) return msg.textContent = "最大7日までです";
+
+  // ▼ 変更点：保存時にも期限チェックを実行する（手入力で未来の日付を入れさせないため）
+  const limitDate = getLimitDate(baseItem.category);
+  if(fromYmd(start) > limitDate || fromYmd(end) > limitDate) {
+      return msg.textContent = `予約可能期限（${getLimitText(baseItem.category)}）を過ぎています`;
+  }
 
   if(baseItem.category !== "av") {
       if(st < "09:00" || et > "21:00" || (st === "21:00" && et > "21:00")) {
