@@ -370,14 +370,12 @@ function renderList(){
   const mStart = `${year}-${pad2(month)}-01`, mEnd = `${year}-${pad2(month)}-${pad2(daysInMonth(year, month))}`;
   const q = searchInput.value.trim().toLowerCase();
   
-  // ▼ 変更点：チェックボックスがONかどうかを取得
   const onlyUnreturned = document.getElementById("filterUnreturned").checked;
   
   const uniq = new Map();
   loadReservations().forEach(r => {
     if(!overlapsMonth(r.startDate, r.endDate, mStart, mEnd)) return;
     
-    // ▼ 変更点：「未返却のみ表示」がONの時は「貸出中（loan）」以外を除外
     if(onlyUnreturned && r.status !== "loan") return;
 
     const it = findItem(r.itemId);
@@ -458,7 +456,6 @@ let listSelectedKeys = new Set();
 document.getElementById("listSelectAllBtn").onclick = () => { listRowPayload.forEach((v,k)=>listSelectedKeys.add(k)); renderList(); };
 document.getElementById("listClearSelBtn").onclick = () => { listSelectedKeys.clear(); renderList(); };
 
-// ▼ 変更点：検索欄の文字入力だけでなく、チェックボックスのON/OFFでもリストを更新する
 searchInput.oninput = renderList;
 document.getElementById("filterUnreturned").onchange = renderList;
 
@@ -744,6 +741,54 @@ function countDueToday(){
   });
   return {due, overdue};
 }
+
+// ▼ 追加：CSVエクスポート機能
+document.getElementById("exportBtn").onclick = () => {
+  const resList = loadReservations();
+  if (resList.length === 0) {
+    showToast("出力するデータがありません", "error");
+    return;
+  }
+
+  // CSVのヘッダーを作成
+  const headers = ["予約ID", "カテゴリ", "備品/場所名", "利用開始日", "利用終了日", "開始時間", "終了時間", "団体名", "数量", "伝票番号", "状態", "登録日時"];
+  let csvContent = "\uFEFF" + headers.join(",") + "\n"; // BOMを追加してExcelでの文字化けを防ぐ
+
+  // データをCSV形式のテキストに変換
+  resList.forEach(r => {
+    const it = findItem(r.itemId);
+    const catName = it ? (it.category === "av" ? "備品" : it.category === "rearcar" ? "リヤカー" : it.category === "pipespace" ? "パイプ" : "デスク") : "不明";
+    const itemName = it ? it.name : "不明";
+    const statusName = statusLabel(r.status);
+
+    const row = [
+      r.id,
+      catName,
+      itemName,
+      r.startDate,
+      r.endDate,
+      r.startTime || "",
+      r.endTime || "",
+      `"${(r.group || "").replace(/"/g, '""')}"`, // カンマが含まれていても崩れないようにダブルクォーテーションで囲む
+      r.quantity || 1,
+      `"${(r.slipNo || "").replace(/"/g, '""')}"`,
+      statusName,
+      r.createdAt || ""
+    ];
+    csvContent += row.join(",") + "\n";
+  });
+
+  // ダウンロード処理
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  const dateStr = ymd(new Date()).replace(/-/g, ""); // 例: 20260320
+  link.setAttribute("download", `予約データ_${dateStr}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
 (function init(){
   const timeSelects = [document.getElementById("modalStartTime"), document.getElementById("modalEndTime")];
