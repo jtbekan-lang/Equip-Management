@@ -62,10 +62,18 @@
     <section id="tabList" class="tabpane">
       <div style="background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow);">
         <div style="font-weight:800; font-size:16px;">予約一覧</div>
-        <div style="margin-top:12px;">
-          <label>検索（備品名 / 団体名 / 伝票）</label>
-          <input id="searchInput" placeholder="例：マイク / IPC / 10" />
+        
+        <div style="margin-top:12px; display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap;">
+          <div style="flex:1; min-width:200px;">
+            <label>検索（備品名 / 団体名 / 伝票）</label>
+            <input id="searchInput" placeholder="例：マイク / IPC / 10" />
+          </div>
+          <label style="display:flex; align-items:center; gap:8px; padding:10px 14px; background:#fff1f2; border:1px solid rgba(225,29,72,.25); border-radius:12px; color:#9f1239; font-weight:bold; cursor:pointer; transition: transform 0.1s;">
+            <input type="checkbox" id="filterUnreturned" style="width:auto; margin:0; transform:scale(1.2);" />
+            未返却（貸出中）のみ表示
+          </label>
         </div>
+
         <div class="subrow" style="margin-top:12px;">
           <span class="pill" id="listSelPill">選択：0件</span>
           <button id="listSelectAllBtn">表示中を全選択</button>
